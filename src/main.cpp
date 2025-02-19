@@ -28,15 +28,15 @@ float lastFrame = 0.0f;
 
 // Vertices coordinates
 GLfloat vertices[] = {
-    //   COORDINATES    /       COLORS        /TEXTURE COORD //
-    -0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // Lower left corner
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f,   // Upper left corner
-    0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f,    // Upper right corner
-    0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f,   // Lower right corner
-    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, // Lower left corner
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,  // Upper left corner
-    0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f,   // Upper right corner
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f,  // Lower right corner
+    //   COORDINATES    /          COLORS          /    TEXTURE COORD  //
+    -0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f,  // Lower left corner
+    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f,   // Upper left corner
+    0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 1.0f,    // Upper right corner
+    0.5f, -0.5f, 0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f,   // Lower right corner
+    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, // Lower left corner
+    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f,  // Upper left corner
+    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 1.0f,   // Upper right corner
+    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f,  // Lower right corner
 };
 
 // Indices for vertices order

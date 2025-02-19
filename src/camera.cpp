@@ -62,14 +62,14 @@ void Camera::processKeyboardEvent(GLFWwindow *window, float deltaTime)
     {
         position += velocity * -up;
     }
-    // if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-    // {
-    //     speed = 0.02f;
-    // }
-    // else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
-    // {
-    //     speed = 0.01f;
-    // }
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        speed = 1.f;
+    }
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
+    {
+        speed = 0.5f;
+    }
 }
 
 void Camera::processMouseEvent(GLFWwindow *window)
