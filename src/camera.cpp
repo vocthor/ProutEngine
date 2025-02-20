@@ -15,16 +15,18 @@ void Camera::matrix(float FOVdeg, float nearPlane, float farPlane, Shader &shade
     // Initializes matrices since otherwise they will be the null matrix
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
 
     // Makes camera look in the right direction from the right position
     view = glm::lookAt(position, position + direction, up);
     // Adds perspective to the scene
     projection = glm::perspective(glm::radians(FOVdeg), (float)width / height, nearPlane, farPlane);
+    // model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
 
     // Exports the camera matrix to the Vertex Shader
     shader.setMat4("projection", projection);
     shader.setMat4("view", view);
-    shader.setMat4("model", glm::mat4(1.0f));
+    shader.setMat4("model", model);
     // glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(projection * view));
 }
 
@@ -64,7 +66,7 @@ void Camera::processKeyboardEvent(GLFWwindow *window, float deltaTime)
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
-        speed = 1.f;
+        speed = 2.f;
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
     {

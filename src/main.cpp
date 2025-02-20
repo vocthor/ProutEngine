@@ -54,6 +54,19 @@ GLuint indices[] = {
     6, 4, 5,
     6, 1, 5};
 
+// world space positions of our cubes
+glm::vec3 cubePositions[] = {
+    glm::vec3(0.0f, 0.0f, 0.0f),
+    glm::vec3(2.0f, 5.0f, -15.0f),
+    glm::vec3(-1.5f, -2.2f, -2.5f),
+    glm::vec3(-3.8f, -2.0f, -12.3f),
+    glm::vec3(2.4f, -0.4f, -3.5f),
+    glm::vec3(-1.7f, 3.0f, -7.5f),
+    glm::vec3(1.3f, -2.0f, -2.5f),
+    glm::vec3(1.5f, 2.0f, -2.5f),
+    glm::vec3(1.5f, 0.2f, -1.5f),
+    glm::vec3(-1.3f, 1.0f, -1.5f)};
+
 int main()
 {
     // glfw: initialize and configure
@@ -143,20 +156,24 @@ int main()
         popCat.bind();
         container.bind();
 
-        // glm::mat4 model = glm::mat4(1.0f);
-        // glm::mat4 view = glm::mat4(1.0f);
-        // glm::mat4 projection = glm::mat4(1.0f);
-        // model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-        // view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        // projection = glm::perspective(glm::radians(45.0f), (float)(SCR_WIDTH / SCR_HEIGHT), 0.1f, 100.0f);
-        // ourShader.setMat4("model", model);
-        // ourShader.setMat4("view", view);
-        // ourShader.setMat4("projection", projection);
-
         camera.matrix(50.0f, 0.1f, 100.0f, ourShader);
 
         VAO1.bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+
+        // Affichage du cube à toutes les cubePositions
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+
+            // Rotation de chaque cube à un angle différent
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            ourShader.setMat4("model", model);
+
+            glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
