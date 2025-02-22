@@ -201,6 +201,13 @@ int main()
     shaderProgram.use();
     shaderProgram.setVec4("lightColor", lightColor);
     shaderProgram.setVec3("lightPos", lightPos);
+    shaderProgram.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    shaderProgram.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    shaderProgram.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    shaderProgram.setFloat("material.shininess", 32.0f);
+    shaderProgram.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    shaderProgram.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    shaderProgram.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     lightShader.use();
     shaderProgram.setMat4("model", lightModel);
     lightShader.setVec4("lightColor", lightColor);
@@ -249,7 +256,7 @@ int main()
         // Affichage du cube à toutes les cubePositions
         for (unsigned int i = 0; i < 10; i++)
         {
-            // * Ces calculs de matrices sont chers à faire sur le GPU, ont le sfait donc sur le CPU
+            // * Ces calculs de matrices sont chers à faire sur le GPU, ont les fait donc sur le CPU
             glm::mat4 localCubeModel = glm::mat4(1.0f);
             localCubeModel = glm::translate(localCubeModel, cubePositions[i]);
 
