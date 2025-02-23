@@ -43,13 +43,13 @@ GLfloat cubeVertices[] = {
     // Lower
     -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower left front corner
     0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,   // Lower right front corner
-    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower right back corner
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f, // Lower left back corner
+    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower right back corner
+    -0.5f, -0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, -1.0f, 0.0f, // Lower left back corner
     // Upper
     -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper left front corner
     0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,   // Upper right front corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper right back corner
-    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f, // Upper left back corner
+    0.5f, 0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper right back corner
+    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 1.0f, 0.0f, // Upper left back corner
     // Right
     0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,   // Upper right front corner
     0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f,  // Lower right front corner
@@ -197,14 +197,15 @@ int main()
 
     // textures
     // --------
-    Texture container("resources/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
-    container.texUnit(shaderProgram, "material.diffuse", 0);
+    Texture container2("resources/textures/container2.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE);
+    container2.texUnit(shaderProgram, "material.diffuse", 0);
+    Texture container2_specular("resources/textures/container2_specular.png", GL_TEXTURE_2D, GL_TEXTURE1, GL_UNSIGNED_BYTE);
+    container2_specular.texUnit(shaderProgram, "material.specular", 1);
 
     // shaders setup
     // -------------
     shaderProgram.use();
-    shaderProgram.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    shaderProgram.setFloat("material.shininess", 32.0f);
+    shaderProgram.setFloat("material.shininess", 64.0f);
     shaderProgram.setVec3("light.position", lightPos);
     shaderProgram.setVec3("light.ambient", lightColor);
     shaderProgram.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
@@ -238,7 +239,8 @@ int main()
 
         // render the triangle
         shaderProgram.use();
-        container.bind();
+        container2.bind();
+        container2_specular.bind();
 
         camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
         shaderProgram.setVec3("viewPos", camera.position);
@@ -254,7 +256,7 @@ int main()
 
             // Rotation de chaque cube à un angle différent
             float angle = 20.0f * i;
-            localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            // localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
             glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
 
@@ -280,7 +282,8 @@ int main()
     VAO1.remove();
     VBO1.remove();
     EBO1.remove();
-    container.remove();
+    container2.remove();
+    container2_specular.remove();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------

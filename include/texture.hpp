@@ -12,6 +12,10 @@ public:
     GLuint ID;
     GLenum type;
     GLenum unit;
+    /**
+     * @brief Format of the image. `GL_RGB` for jpg, `GL_RGBA` for png.
+     */
+    GLenum format;
 
     /**
      * @brief Construct a new Texture object
@@ -19,10 +23,9 @@ public:
      * @param image Path to the image file
      * @param texType Is it a 1D, 2D or 3D texture ?
      * @param slot Which unit slot to use (in a case of multiple textures)
-     * @param format Format of the image. `GL_RGB` for jpg, `GL_RGBA` for png.
      * @param pixelType Usually GL_UNSIGNED_BYTE
      */
-    Texture(const char *image, GLenum texType, GLenum slot, GLenum format, GLenum pixelType);
+    Texture(const char *image, GLenum texType, GLenum slot, GLenum pixelType);
 
     /**
      * @brief Assigns a texture unit to a texture
