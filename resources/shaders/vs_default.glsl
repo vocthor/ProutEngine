@@ -9,17 +9,17 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform mat3 normal;
 
-out vec2 ourTextureCoord;
-out vec3 ourNormal;
-out vec3 fragPos;
+out vec2 TextureCoord;
+out vec3 Normal;
+out vec3 FragPos;
 
 void main()
 {
-    fragPos = vec3(model * vec4(aPos, 1.0));
-    ourTextureCoord = aTextureCoord;
+    FragPos = vec3(model * vec4(aPos, 1.0));
+    TextureCoord = aTextureCoord;
     // ! matrix inversion should be calculated on the CPU, and not the GPU (just like the model matrix)
-    ourNormal = normal * aNormal;
+    Normal = normal * aNormal;
 
     // note that we read the multiplication from right to left
-    gl_Position = projection * view * vec4(fragPos, 1.0);
+    gl_Position = projection * view * vec4(FragPos, 1.0);
 };

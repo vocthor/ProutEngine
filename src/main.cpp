@@ -121,6 +121,10 @@ GLuint lightIndices[] = {
     4, 5, 6,
     4, 6, 7};
 
+glm::vec3 pointLightPositions[] = {
+    glm::vec3(0.7f, 0.2f, 2.0f),
+    glm::vec3(2.3f, -3.3f, -4.0f)};
+
 int main()
 {
     // glfw: initialize and configure
@@ -190,10 +194,7 @@ int main()
 
     // light cube parametrization
     // --------------------------
-    glm::vec3 lightColor = glm::vec3(0.2f);
-    glm::vec3 lightPos = glm::vec3(0.f, 0.f, -1.5f);
-    glm::mat4 lightModel = glm::mat4(1.0f);
-    lightModel = glm::translate(lightModel, lightPos);
+    glm::vec3 lightColor = glm::vec3(1.0f);
 
     // textures
     // --------
@@ -205,15 +206,38 @@ int main()
     // shaders setup
     // -------------
     shaderProgram.use();
-    shaderProgram.setFloat("material.shininess", 64.0f);
-    shaderProgram.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-    shaderProgram.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-    shaderProgram.setVec3("light.ambient", lightColor);
-    shaderProgram.setVec3("light.diffuse", 1.f, 1.f, 1.f); // darken diffuse light a bit
-    shaderProgram.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-    shaderProgram.setFloat("light.constant", 1.0f);
-    shaderProgram.setFloat("light.linear", 0.09f);
-    shaderProgram.setFloat("light.quadratic", 0.032f);
+    shaderProgram.setFloat("material.shininess", 32.0f);
+    // directional light
+    shaderProgram.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+    shaderProgram.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.2f);
+    shaderProgram.setVec3("dirLight.diffuse", 0.25f, 0.25f, 1.0f);
+    shaderProgram.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+    // point light 1
+    shaderProgram.setVec3("pointLights[0].position", pointLightPositions[0]);
+    shaderProgram.setVec3("pointLights[0].ambient", 0.05f, 0.2f, 0.05f);
+    shaderProgram.setVec3("pointLights[0].diffuse", 0.25f, 1.0f, 0.25f);
+    shaderProgram.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+    shaderProgram.setFloat("pointLights[0].constant", 1.0f);
+    shaderProgram.setFloat("pointLights[0].linear", 0.09f);
+    shaderProgram.setFloat("pointLights[0].quadratic", 0.032f);
+    // point light 2
+    shaderProgram.setVec3("pointLights[1].position", pointLightPositions[1]);
+    shaderProgram.setVec3("pointLights[1].ambient", 0.2f, 0.05f, 0.05f);
+    shaderProgram.setVec3("pointLights[1].diffuse", 1.0f, 0.25f, 0.25f);
+    shaderProgram.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+    shaderProgram.setFloat("pointLights[1].constant", 1.0f);
+    shaderProgram.setFloat("pointLights[1].linear", 0.09f);
+    shaderProgram.setFloat("pointLights[1].quadratic", 0.032f);
+    // spotLight
+    shaderProgram.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+    shaderProgram.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    shaderProgram.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+    shaderProgram.setFloat("spotLight.constant", 1.0f);
+    shaderProgram.setFloat("spotLight.linear", 0.09f);
+    shaderProgram.setFloat("spotLight.quadratic", 0.032f);
+    shaderProgram.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    shaderProgram.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+
     lightShader.use();
     lightShader.setVec3("lightColor", lightColor);
 
@@ -247,8 +271,8 @@ int main()
 
         camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
         shaderProgram.setVec3("viewPos", camera.position);
-        shaderProgram.setVec3("light.position", camera.position);
-        shaderProgram.setVec3("light.direction", camera.direction);
+        shaderProgram.setVec3("spotLight.position", camera.position);
+        shaderProgram.setVec3("spotLight.direction", camera.direction);
 
         VAO1.bind();
 
@@ -274,7 +298,15 @@ int main()
         lightShader.use();
         camera.matrix(50.0f, 0.1f, 100.0f, lightShader);
         lightVAO.bind();
-        glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 2; i++)
+        {
+            glm::mat4 localLightModel = glm::mat4(1.0f);
+            localLightModel = glm::translate(localLightModel, pointLightPositions[i]);
+            localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
+            lightShader.setMat4("model", localLightModel);
+
+            glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
