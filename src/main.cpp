@@ -206,7 +206,8 @@ int main()
     // -------------
     shaderProgram.use();
     shaderProgram.setFloat("material.shininess", 64.0f);
-    shaderProgram.setVec3("light.position", lightPos);
+    shaderProgram.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+    shaderProgram.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
     shaderProgram.setVec3("light.ambient", lightColor);
     shaderProgram.setVec3("light.diffuse", 1.f, 1.f, 1.f); // darken diffuse light a bit
     shaderProgram.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
@@ -214,7 +215,6 @@ int main()
     shaderProgram.setFloat("light.linear", 0.09f);
     shaderProgram.setFloat("light.quadratic", 0.032f);
     lightShader.use();
-    shaderProgram.setMat4("model", lightModel);
     lightShader.setVec3("lightColor", lightColor);
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
@@ -247,6 +247,8 @@ int main()
 
         camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
         shaderProgram.setVec3("viewPos", camera.position);
+        shaderProgram.setVec3("light.position", camera.position);
+        shaderProgram.setVec3("light.direction", camera.direction);
 
         VAO1.bind();
 
