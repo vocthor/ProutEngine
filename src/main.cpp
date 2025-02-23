@@ -190,7 +190,7 @@ int main()
 
     // light cube parametrization
     // --------------------------
-    glm::vec3 lightColor = glm::vec3(0.2f, 0.2f, 0.2f);
+    glm::vec3 lightColor = glm::vec3(0.2f);
     glm::vec3 lightPos = glm::vec3(0.f, 0.f, -1.5f);
     glm::mat4 lightModel = glm::mat4(1.0f);
     lightModel = glm::translate(lightModel, lightPos);
@@ -208,8 +208,11 @@ int main()
     shaderProgram.setFloat("material.shininess", 64.0f);
     shaderProgram.setVec3("light.position", lightPos);
     shaderProgram.setVec3("light.ambient", lightColor);
-    shaderProgram.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
+    shaderProgram.setVec3("light.diffuse", 1.f, 1.f, 1.f); // darken diffuse light a bit
     shaderProgram.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    shaderProgram.setFloat("light.constant", 1.0f);
+    shaderProgram.setFloat("light.linear", 0.09f);
+    shaderProgram.setFloat("light.quadratic", 0.032f);
     lightShader.use();
     shaderProgram.setMat4("model", lightModel);
     lightShader.setVec3("lightColor", lightColor);
@@ -256,7 +259,7 @@ int main()
 
             // Rotation de chaque cube à un angle différent
             float angle = 20.0f * i;
-            // localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
             glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
 
