@@ -29,37 +29,37 @@ float lastFrame = 0.0f;
 // Vertices coordinates
 // * Need 24 vertexes because normals cannot be shared between faces
 GLfloat cubeVertices[] = {
-    //   COORDINATES    /          COLORS          /    TEXTURE COORD    /       NORMAL       //
+    //   COORDINATES    /    TEXTURE COORD    /      NORMAL     //
     // Front
-    -0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, // Lower left front corner
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,  // Upper left front corner
-    0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,   // Upper right front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f,  // Lower right front corner
+    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, // Lower left front corner
+    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,  // Upper left front corner
+    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,   // Upper right front corner
+    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f,  // Lower right front corner
     // Back
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f, // Lower left back corner
-    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,  // Upper left back corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,   // Upper right back corner
-    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f,  // Lower right back corner
+    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f, // Lower left back corner
+    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,  // Upper left back corner
+    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,   // Upper right back corner
+    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f,  // Lower right back corner
     // Lower
-    -0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower left front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,   // Lower right front corner
-    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower right back corner
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f, // Lower left back corner
+    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower left front corner
+    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,   // Lower right front corner
+    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower right back corner
+    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f, // Lower left back corner
     // Upper
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper left front corner
-    0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,   // Upper right front corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper right back corner
-    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f, // Upper left back corner
+    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper left front corner
+    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,   // Upper right front corner
+    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper right back corner
+    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f, // Upper left back corner
     // Right
-    0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,   // Upper right front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f,  // Lower right front corner
-    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, // Lower right back corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, 0.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,  // Upper right back corner
+    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,   // Upper right front corner
+    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f,  // Lower right front corner
+    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, // Lower right back corner
+    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,  // Upper right back corner
     // Left
-    -0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 0.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f,  // Lower left front corner
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 0.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,   // Upper left front corner
-    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, 1.0f, 1.0f, /**/ 1.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,  // Upper left back corner
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, 0.0f, 1.0f, /**/ 1.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f, // Lower left back corner
+    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f,  // Lower left front corner
+    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,   // Upper left front corner
+    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,  // Upper left back corner
+    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f, // Lower left back corner
 };
 
 // Indices for cubeVertices order
@@ -168,10 +168,9 @@ int main()
     VAO1.bind();
     VBO VBO1(cubeVertices, sizeof(cubeVertices));
     EBO EBO1(cubeIndices, sizeof(cubeIndices));
-    VAO1.linkAttrib(VBO1, 0, 3, GL_FLOAT, 12 * sizeof(float), (void *)0);
-    VAO1.linkAttrib(VBO1, 1, 4, GL_FLOAT, 12 * sizeof(float), (void *)(3 * sizeof(float)));
-    VAO1.linkAttrib(VBO1, 2, 2, GL_FLOAT, 12 * sizeof(float), (void *)(7 * sizeof(float)));
-    VAO1.linkAttrib(VBO1, 3, 3, GL_FLOAT, 12 * sizeof(float), (void *)(9 * sizeof(float)));
+    VAO1.linkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void *)0);
+    VAO1.linkAttrib(VBO1, 1, 2, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    VAO1.linkAttrib(VBO1, 2, 3, GL_FLOAT, 8 * sizeof(float), (void *)(5 * sizeof(float)));
     VAO1.unbind();
     VBO1.unbind();
     EBO1.unbind();
@@ -191,34 +190,28 @@ int main()
 
     // light cube parametrization
     // --------------------------
-    glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    glm::vec3 lightColor = glm::vec3(0.2f, 0.2f, 0.2f);
     glm::vec3 lightPos = glm::vec3(0.f, 0.f, -1.5f);
     glm::mat4 lightModel = glm::mat4(1.0f);
     lightModel = glm::translate(lightModel, lightPos);
 
+    // textures
+    // --------
+    Texture container("resources/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+    container.texUnit(shaderProgram, "material.diffuse", 0);
+
     // shaders setup
     // -------------
     shaderProgram.use();
-    shaderProgram.setVec4("lightColor", lightColor);
-    shaderProgram.setVec3("lightPos", lightPos);
-    shaderProgram.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-    shaderProgram.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
     shaderProgram.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
     shaderProgram.setFloat("material.shininess", 32.0f);
-    shaderProgram.setVec3("light.ambient", 0.2f, 0.2f, 0.2f);
+    shaderProgram.setVec3("light.position", lightPos);
+    shaderProgram.setVec3("light.ambient", lightColor);
     shaderProgram.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f); // darken diffuse light a bit
     shaderProgram.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
     lightShader.use();
     shaderProgram.setMat4("model", lightModel);
-    lightShader.setVec4("lightColor", lightColor);
-
-    // textures
-    // --------
-    Texture popCat("resources/textures/pop_cat.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    popCat.texUnit(shaderProgram, "texture0", 0);
-
-    Texture container("resources/textures/container.jpg", GL_TEXTURE_2D, GL_TEXTURE1, GL_RGB, GL_UNSIGNED_BYTE);
-    container.texUnit(shaderProgram, "texture1", 1);
+    lightShader.setVec3("lightColor", lightColor);
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 
@@ -245,7 +238,6 @@ int main()
 
         // render the triangle
         shaderProgram.use();
-        popCat.bind();
         container.bind();
 
         camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
