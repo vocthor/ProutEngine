@@ -10,8 +10,8 @@ class Texture
 {
 public:
     GLuint ID;
-    GLenum type;
-    GLenum unit;
+    const char *type;
+    GLuint unit;
     /**
      * @brief Format of the image. `GL_RGB` for jpg, `GL_RGBA` for png.
      */
@@ -25,7 +25,7 @@ public:
      * @param slot Which unit slot to use (in a case of multiple textures)
      * @param pixelType Usually GL_UNSIGNED_BYTE
      */
-    Texture(const char *image, GLenum texType, GLenum slot, GLenum pixelType);
+    Texture(const char *image, const char *texType, GLenum slot, GLenum pixelType);
 
     /**
      * @brief Assigns a texture unit to a texture

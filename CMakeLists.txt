@@ -17,4 +17,4 @@ add_subdirectory(lib/glad)
 add_subdirectory(lib/stb_image)
 add_subdirectory(lib/glm)
 
-set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 17)
+set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 23)

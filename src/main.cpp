@@ -8,12 +8,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "shader.hpp"
-#include "VBO.hpp"
-#include "VAO.hpp"
-#include "EBO.hpp"
-#include "texture.hpp"
-#include "camera.hpp"
+#include "mesh.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -28,38 +23,38 @@ float lastFrame = 0.0f;
 
 // Vertices coordinates
 // * Need 24 vertexes because normals cannot be shared between faces
-GLfloat cubeVertices[] = {
-    //   COORDINATES    /    TEXTURE COORD    /      NORMAL     //
+Vertex cubeVertices[] = {
+    //           COORDINATES            /            NORMAL           / COLOR (useless) /      TEXTURE COORD     //
     // Front
-    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f, // Lower left front corner
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,  // Upper left front corner
-    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, 1.0f,   // Upper right front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, 1.0f,  // Lower right front corner
+    Vertex{glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)}, // Lower left front corner
+    Vertex{glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)},  // Upper left front corner
+    Vertex{glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},   // Upper right front corner
+    Vertex{glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)},  // Lower right front corner
     // Back
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f, // Lower left back corner
-    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,  // Upper left back corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 0.0f, -1.0f,   // Upper right back corner
-    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 0.0f, -1.0f,  // Lower right back corner
+    Vertex{glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)}, // Lower left back corner
+    Vertex{glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},  // Upper left back corner
+    Vertex{glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)},   // Upper right back corner
+    Vertex{glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)},  // Lower right back corner
     // Lower
-    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower left front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, -1.0f, 0.0f,   // Lower right front corner
-    0.5f, -0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, -1.0f, 0.0f,  // Lower right back corner
-    -0.5f, -0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, -1.0f, 0.0f, // Lower left back corner
+    Vertex{glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)},  // Lower left front corner
+    Vertex{glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)},   // Lower right front corner
+    Vertex{glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},  // Lower right back corner
+    Vertex{glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)}, // Lower left back corner
     // Upper
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper left front corner
-    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 0.0f, 1.0f, 0.0f,   // Upper right front corner
-    0.5f, 0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ 0.0f, 1.0f, 0.0f,  // Upper right back corner
-    -0.5f, 0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 0.0f, 1.0f, 0.0f, // Upper left back corner
+    Vertex{glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)},  // Upper left front corner
+    Vertex{glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},   // Upper right front corner
+    Vertex{glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)},  // Upper right back corner
+    Vertex{glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)}, // Upper left back corner
     // Right
-    0.5f, 0.5f, 0.5f, /**/ 1.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,   // Upper right front corner
-    0.5f, -0.5f, 0.5f, /**/ 1.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f,  // Lower right front corner
-    0.5f, -0.5f, -0.5f, /**/ 0.0f, 0.0f, /**/ 1.0f, 0.0f, 0.0f, // Lower right back corner
-    0.5f, 0.5f, -0.5f, /**/ 0.0f, 1.0f, /**/ 1.0f, 0.0f, 0.0f,  // Upper right back corner
+    Vertex{glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},   // Upper right front corner
+    Vertex{glm::vec3(0.5f, -0.5f, 0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)},  // Lower right front corner
+    Vertex{glm::vec3(0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)}, // Lower right back corner
+    Vertex{glm::vec3(0.5f, 0.5f, -0.5f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)},  // Upper right back corner
     // Left
-    -0.5f, -0.5f, 0.5f, /**/ 0.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f,  // Lower left front corner
-    -0.5f, 0.5f, 0.5f, /**/ 0.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,   // Upper left front corner
-    -0.5f, 0.5f, -0.5f, /**/ 1.0f, 1.0f, /**/ -1.0f, 0.0f, 0.0f,  // Upper left back corner
-    -0.5f, -0.5f, -0.5f, /**/ 1.0f, 0.0f, /**/ -1.0f, 0.0f, 0.0f, // Lower left back corner
+    Vertex{glm::vec3(-0.5f, -0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 0.0f)},  // Lower left front corner
+    Vertex{glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(0.0f, 1.0f)},   // Upper left front corner
+    Vertex{glm::vec3(-0.5f, 0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 1.0f)},  // Upper left back corner
+    Vertex{glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec2(1.0f, 0.0f)}, // Lower left back corner
 };
 
 // Indices for cubeVertices order
@@ -96,16 +91,16 @@ glm::vec3 cubePositions[] = {
     glm::vec3(1.5f, 0.2f, -1.5f),
     glm::vec3(-1.3f, 1.0f, -1.5f)};
 
-GLfloat lightVertices[] = {
+Vertex lightVertices[] = {
     //     COORDINATES     //
-    -0.1f, -0.1f, 0.1f,
-    -0.1f, -0.1f, -0.1f,
-    0.1f, -0.1f, -0.1f,
-    0.1f, -0.1f, 0.1f,
-    -0.1f, 0.1f, 0.1f,
-    -0.1f, 0.1f, -0.1f,
-    0.1f, 0.1f, -0.1f,
-    0.1f, 0.1f, 0.1f};
+    Vertex{glm::vec3(-0.1f, -0.1f, 0.1f)},
+    Vertex{glm::vec3(-0.1f, -0.1f, -0.1f)},
+    Vertex{glm::vec3(0.1f, -0.1f, -0.1f)},
+    Vertex{glm::vec3(0.1f, -0.1f, 0.1f)},
+    Vertex{glm::vec3(-0.1f, 0.1f, 0.1f)},
+    Vertex{glm::vec3(-0.1f, 0.1f, -0.1f)},
+    Vertex{glm::vec3(0.1f, 0.1f, -0.1f)},
+    Vertex{glm::vec3(0.1f, 0.1f, 0.1f)}};
 
 GLuint lightIndices[] = {
     0, 1, 2,
@@ -162,46 +157,30 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+    // textures
+    // --------
+    Texture textures[]{
+        Texture("resources/textures/container2.png", "texture_diffuse", 0, GL_UNSIGNED_BYTE),
+        Texture("resources/textures/container2_specular.png", "texture_specular", 1, GL_UNSIGNED_BYTE)};
+
     // build and compile our shader program
     // ------------------------------------
     Shader shaderProgram("resources/shaders/vs_default.glsl", "resources/shaders/fs_default.glsl");
-
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    VAO VAO1;
-    VAO1.bind();
-    VBO VBO1(cubeVertices, sizeof(cubeVertices));
-    EBO EBO1(cubeIndices, sizeof(cubeIndices));
-    VAO1.linkAttrib(VBO1, 0, 3, GL_FLOAT, 8 * sizeof(float), (void *)0);
-    VAO1.linkAttrib(VBO1, 1, 2, GL_FLOAT, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    VAO1.linkAttrib(VBO1, 2, 3, GL_FLOAT, 8 * sizeof(float), (void *)(5 * sizeof(float)));
-    VAO1.unbind();
-    VBO1.unbind();
-    EBO1.unbind();
+    std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
+    std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
+    std::vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+    Mesh cube(verts, ind, tex);
 
     // light shader
     // ------------
     Shader lightShader("resources/shaders/vs_light.glsl", "resources/shaders/fs_light.glsl");
-    VAO lightVAO;
-    lightVAO.bind();
-    // ! TODO : replace lightVBO and lightEBO by VBO1 and EBO1 because all are cubes ... ?
-    VBO lightVBO(lightVertices, sizeof(lightVertices));
-    EBO lightEBO(lightIndices, sizeof(lightIndices));
-    lightVAO.linkAttrib(lightVBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void *)0);
-    lightVAO.unbind();
-    lightVBO.unbind();
-    lightEBO.unbind();
+    std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
+    std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
+    Mesh light(lightVerts, lightInd, {});
 
     // light cube parametrization
     // --------------------------
     glm::vec3 lightColor = glm::vec3(1.0f);
-
-    // textures
-    // --------
-    Texture container2("resources/textures/container2.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_UNSIGNED_BYTE);
-    container2.texUnit(shaderProgram, "material.diffuse", 0);
-    Texture container2_specular("resources/textures/container2_specular.png", GL_TEXTURE_2D, GL_TEXTURE1, GL_UNSIGNED_BYTE);
-    container2_specular.texUnit(shaderProgram, "material.specular", 1);
 
     // shaders setup
     // -------------
@@ -264,17 +243,9 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // render the triangle
         shaderProgram.use();
-        container2.bind();
-        container2_specular.bind();
-
-        camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
-        shaderProgram.setVec3("viewPos", camera.position);
         shaderProgram.setVec3("spotLight.position", camera.position);
         shaderProgram.setVec3("spotLight.direction", camera.direction);
-
-        VAO1.bind();
 
         // Affichage du cube à toutes les cubePositions
         for (unsigned int i = 0; i < 10; i++)
@@ -292,12 +263,10 @@ int main()
             shaderProgram.setMat4("model", localCubeModel);
             shaderProgram.setMat3("normal", localCubeNormal);
 
-            glDrawElements(GL_TRIANGLES, sizeof(cubeIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+            cube.draw(shaderProgram, camera);
         }
 
         lightShader.use();
-        camera.matrix(50.0f, 0.1f, 100.0f, lightShader);
-        lightVAO.bind();
         for (unsigned int i = 0; i < 2; i++)
         {
             glm::mat4 localLightModel = glm::mat4(1.0f);
@@ -305,7 +274,7 @@ int main()
             localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
             lightShader.setMat4("model", localLightModel);
 
-            glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+            light.draw(lightShader, camera);
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -316,11 +285,8 @@ int main()
 
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    VAO1.remove();
-    VBO1.remove();
-    EBO1.remove();
-    container2.remove();
-    container2_specular.remove();
+    cube.remove();
+    light.remove();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
