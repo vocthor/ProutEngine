@@ -10,11 +10,12 @@ add_executable("${CMAKE_PROJECT_NAME}")
 
 target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES} )
 target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC include)
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad stb_image)
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad stb_image assimp)
 
 add_subdirectory(lib/glfw-3.4)
 add_subdirectory(lib/glad)
 add_subdirectory(lib/stb_image)
 add_subdirectory(lib/glm)
+add_subdirectory(lib/assimp)
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 23)

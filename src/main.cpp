@@ -9,6 +9,7 @@
 #include <cmath>
 
 #include "mesh.hpp"
+#include "model.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -89,7 +90,8 @@ glm::vec3 cubePositions[] = {
     glm::vec3(1.3f, -2.0f, -2.5f),
     glm::vec3(1.5f, 2.0f, -2.5f),
     glm::vec3(1.5f, 0.2f, -1.5f),
-    glm::vec3(-1.3f, 1.0f, -1.5f)};
+    glm::vec3(-1.3f, 1.0f, -1.5f),
+};
 
 Vertex lightVertices[] = {
     //     COORDINATES     //
@@ -100,7 +102,8 @@ Vertex lightVertices[] = {
     Vertex{glm::vec3(-0.1f, 0.1f, 0.1f)},
     Vertex{glm::vec3(-0.1f, 0.1f, -0.1f)},
     Vertex{glm::vec3(0.1f, 0.1f, -0.1f)},
-    Vertex{glm::vec3(0.1f, 0.1f, 0.1f)}};
+    Vertex{glm::vec3(0.1f, 0.1f, 0.1f)},
+};
 
 GLuint lightIndices[] = {
     0, 1, 2,
@@ -118,7 +121,8 @@ GLuint lightIndices[] = {
 
 glm::vec3 pointLightPositions[] = {
     glm::vec3(0.7f, 0.2f, 2.0f),
-    glm::vec3(2.3f, -3.3f, -4.0f)};
+    glm::vec3(2.3f, -3.3f, -4.0f),
+};
 
 int main()
 {
@@ -153,15 +157,23 @@ int main()
         return -1;
     }
 
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    stbi_set_flip_vertically_on_load(true);
+
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+    // load models
+    // -----------
+    Model ourModel("resources/models/backpack/backpack.obj");
+
     // textures
     // --------
     Texture textures[]{
-        Texture("resources/textures/container2.png", "texture_diffuse", 0, GL_UNSIGNED_BYTE),
-        Texture("resources/textures/container2_specular.png", "texture_specular", 1, GL_UNSIGNED_BYTE)};
+        Texture("resources/textures/container2.png", "texture_diffuse", 0),
+        Texture("resources/textures/container2_specular.png", "texture_specular", 1),
+    };
 
     // build and compile our shader program
     // ------------------------------------
@@ -247,35 +259,44 @@ int main()
         shaderProgram.setVec3("spotLight.position", camera.position);
         shaderProgram.setVec3("spotLight.direction", camera.direction);
 
-        // Affichage du cube à toutes les cubePositions
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            // * Ces calculs de matrices sont chers à faire sur le GPU, ont les fait donc sur le CPU
-            glm::mat4 localCubeModel = glm::mat4(1.0f);
-            localCubeModel = glm::translate(localCubeModel, cubePositions[i]);
+        // render the loaded model
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));     // it's a bit too big for our scene, so scale it down
+        glm::mat3 normal = glm::transpose(glm::inverse(model));
+        shaderProgram.setMat4("model", model);
+        shaderProgram.setMat3("normal", normal);
+        ourModel.draw(shaderProgram, camera);
 
-            // Rotation de chaque cube à un angle différent
-            float angle = 20.0f * i;
-            localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+        // // Affichage du cube à toutes les cubePositions
+        // for (unsigned int i = 0; i < 10; i++)
+        // {
+        //     // * Ces calculs de matrices sont chers à faire sur le GPU, ont les fait donc sur le CPU
+        //     glm::mat4 localCubeModel = glm::mat4(1.0f);
+        //     localCubeModel = glm::translate(localCubeModel, cubePositions[i]);
 
-            glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
+        //     // Rotation de chaque cube à un angle différent
+        //     float angle = 20.0f * i;
+        //     localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
-            shaderProgram.setMat4("model", localCubeModel);
-            shaderProgram.setMat3("normal", localCubeNormal);
+        //     glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
 
-            cube.draw(shaderProgram, camera);
-        }
+        //     shaderProgram.setMat4("model", localCubeModel);
+        //     shaderProgram.setMat3("normal", localCubeNormal);
 
-        lightShader.use();
-        for (unsigned int i = 0; i < 2; i++)
-        {
-            glm::mat4 localLightModel = glm::mat4(1.0f);
-            localLightModel = glm::translate(localLightModel, pointLightPositions[i]);
-            localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
-            lightShader.setMat4("model", localLightModel);
+        //     cube.draw(shaderProgram, camera);
+        // }
 
-            light.draw(lightShader, camera);
-        }
+        // lightShader.use();
+        // for (unsigned int i = 0; i < 2; i++)
+        // {
+        //     glm::mat4 localLightModel = glm::mat4(1.0f);
+        //     localLightModel = glm::translate(localLightModel, pointLightPositions[i]);
+        //     localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
+        //     lightShader.setMat4("model", localLightModel);
+
+        //     light.draw(lightShader, camera);
+        // }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

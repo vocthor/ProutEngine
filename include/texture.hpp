@@ -10,6 +10,7 @@ class Texture
 {
 public:
     GLuint ID;
+    const char *path;
     const char *type;
     GLuint unit;
     /**
@@ -25,7 +26,7 @@ public:
      * @param slot Which unit slot to use (in a case of multiple textures)
      * @param pixelType Usually GL_UNSIGNED_BYTE
      */
-    Texture(const char *image, const char *texType, GLenum slot, GLenum pixelType);
+    Texture(const char *image, const char *texType, GLuint slot, GLenum pixelType = GL_UNSIGNED_BYTE);
 
     /**
      * @brief Assigns a texture unit to a texture

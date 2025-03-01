@@ -2,9 +2,8 @@
 
 Texture::Texture(const char *image, const char *texType, GLuint slot, GLenum pixelType)
 {
-	// Assigns the type of the texture ot the texture object
+	path = image;
 	type = texType;
-	// Assigns the unit slot of the texture ot the texture object
 	unit = slot;
 
 	// Generates an OpenGL texture object
@@ -47,7 +46,7 @@ Texture::Texture(const char *image, const char *texType, GLuint slot, GLenum pix
 	}
 	else
 	{
-		std::cout << "Failed to load texture" << std::endl;
+		std::cout << "Failed to load texture : " << image << std::endl;
 	}
 
 	// Deletes the image data as it is already in the OpenGL Texture object
