@@ -171,8 +171,8 @@ int main()
     // textures
     // --------
     Texture textures[]{
-        Texture("resources/textures/container2.png", "texture_diffuse", 0),
-        Texture("resources/textures/container2_specular.png", "texture_specular", 1),
+        Texture("resources/textures/container2.png", "texture_diffuse"),
+        Texture("resources/textures/container2_specular.png", "texture_specular"),
     };
 
     // build and compile our shader program

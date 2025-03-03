@@ -123,8 +123,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         bool skip = false;
         for (unsigned int j = 0; j < textures_loaded.size(); j++)
         {
-            if (std::strcmp(textures_loaded[j].path, _path.c_str()) == 0)
+            if (textures_loaded[j].path == _path)
             {
+                std::cout << std::endl;
                 textures.push_back(textures_loaded[j]);
                 skip = true;
                 break;
@@ -132,14 +133,10 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         }
         if (!skip)
         { // if texture hasn't been loaded already, load it
-            Texture texture(_path.c_str(), typeName.c_str(), i);
+            Texture texture(_path, typeName);
             textures.push_back(texture);
             textures_loaded.push_back(texture); // add to loaded textures
             std::cout << " (NEW)" << std::endl;
-        }
-        else
-        {
-            std::cout << std::endl;
         }
     }
     return textures;
