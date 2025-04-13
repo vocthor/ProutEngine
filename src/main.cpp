@@ -161,10 +161,11 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
+    glEnable(GL_STENCIL_TEST);
 
     // load models
     // -----------
-    // Model ourModel("resources/models/backpack/backpack.obj");
+    Model ourModel("resources/models/monstre/Monstre.obj");
 
     // textures
     // --------
@@ -175,7 +176,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    Shader shaderProgram("resources/shaders/vs_depth.glsl", "resources/shaders/fs_depth.glsl");
+    Shader shaderProgram("resources/shaders/vs_default.glsl", "resources/shaders/fs_default.glsl");
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
     std::vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
@@ -251,7 +252,7 @@ int main()
         // render
         // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shaderProgram.use();
         shaderProgram.setVec3("spotLight.position", camera.position);
@@ -264,37 +265,37 @@ int main()
         glm::mat3 normal = glm::transpose(glm::inverse(model));
         shaderProgram.setMat4("model", model);
         shaderProgram.setMat3("normal", normal);
-        // ourModel.draw(shaderProgram, camera);
+        ourModel.draw(shaderProgram, camera);
 
-        // Affichage du cube à toutes les cubePositions
-        for (unsigned int i = 0; i < 10; i++)
-        {
-            // * Ces calculs de matrices sont chers à faire sur le GPU, ont les fait donc sur le CPU
-            glm::mat4 localCubeModel = glm::mat4(1.0f);
-            localCubeModel = glm::translate(localCubeModel, cubePositions[i]);
+        // // Affichage du cube à toutes les cubePositions
+        // for (unsigned int i = 0; i < 10; i++)
+        // {
+        //     // * Ces calculs de matrices sont chers à faire sur le GPU, ont les fait donc sur le CPU
+        //     glm::mat4 localCubeModel = glm::mat4(1.0f);
+        //     localCubeModel = glm::translate(localCubeModel, cubePositions[i]);
 
-            // Rotation de chaque cube à un angle différent
-            float angle = 20.0f * i;
-            localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+        //     // Rotation de chaque cube à un angle différent
+        //     float angle = 20.0f * i;
+        //     localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
-            glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
+        //     glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
 
-            shaderProgram.setMat4("model", localCubeModel);
-            shaderProgram.setMat3("normal", localCubeNormal);
+        //     shaderProgram.setMat4("model", localCubeModel);
+        //     shaderProgram.setMat3("normal", localCubeNormal);
 
-            cube.draw(shaderProgram, camera);
-        }
+        //     cube.draw(shaderProgram, camera);
+        // }
 
-        lightShader.use();
-        for (unsigned int i = 0; i < 2; i++)
-        {
-            glm::mat4 localLightModel = glm::mat4(1.0f);
-            localLightModel = glm::translate(localLightModel, pointLightPositions[i]);
-            localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
-            lightShader.setMat4("model", localLightModel);
+        // lightShader.use();
+        // for (unsigned int i = 0; i < 2; i++)
+        // {
+        //     glm::mat4 localLightModel = glm::mat4(1.0f);
+        //     localLightModel = glm::translate(localLightModel, pointLightPositions[i]);
+        //     localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
+        //     lightShader.setMat4("model", localLightModel);
 
-            light.draw(lightShader, camera);
-        }
+        //     light.draw(lightShader, camera);
+        // }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
