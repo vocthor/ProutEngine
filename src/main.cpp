@@ -1,13 +1,15 @@
 
 
+#include <cmath>
+#include <iostream>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include <cmath>
 
+#include "autoRelease.hpp"
 #include "mesh.hpp"
 #include "model.hpp"
 
@@ -165,7 +167,7 @@ int main()
 
     // load models
     // -----------
-    Model ourModel("resources/models/monstre/Monstre.obj");
+    Model ourModel("resources/models/backpack/backpack.obj");
 
     // textures
     // --------
@@ -176,18 +178,24 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    Shader shaderProgram("resources/shaders/vs_default.glsl", "resources/shaders/fs_default.glsl");
+    Shader vertexShader("resources/shaders/vs_default.glsl", ShaderType::VERTEX);
+    Shader fragmentShader("resources/shaders/fs_default.glsl", ShaderType::FRAGMENT);
+    ShaderProgram shaderProgram(vertexShader, fragmentShader);
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
     std::vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
     Mesh cube(verts, ind, tex);
+    std::cout << "Shader program default created.\n";
 
     // light shader
     // ------------
-    Shader lightShader("resources/shaders/vs_light.glsl", "resources/shaders/fs_light.glsl");
+    Shader vertexLightShader("resources/shaders/vs_light.glsl", ShaderType::VERTEX);
+    Shader fragmentLightShader("resources/shaders/fs_light.glsl", ShaderType::FRAGMENT);
+    ShaderProgram lightShader(vertexLightShader, fragmentLightShader);
     std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
     std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
     Mesh light(lightVerts, lightInd, {});
+    std::cout << "Shader program light created.\n";
 
     // light cube parametrization
     // --------------------------
@@ -227,9 +235,11 @@ int main()
     shaderProgram.setFloat("spotLight.quadratic", 0.032f);
     shaderProgram.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
     shaderProgram.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    std::cout << "Shader program default setup.\n";
 
     lightShader.use();
     lightShader.setVec3("lightColor", lightColor);
+    std::cout << "Shader program light setup.\n";
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 

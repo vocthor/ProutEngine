@@ -22,10 +22,10 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     EBO.unbind();
 }
 
-void Mesh::draw(Shader &shader, Camera &camera)
+void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
-    // Bind shader to be able to access uniforms
-    shader.use();
+    // Bind shaderProgram to be able to access uniforms
+    shaderProgram.use();
     vao.bind();
 
     // Keep track of how many of each type of textures we have
@@ -42,12 +42,12 @@ void Mesh::draw(Shader &shader, Camera &camera)
         else if (type == "texture_specular")
             num = std::to_string(numSpecular++);
 
-        textures[i].texUnit(shader, ("material." + type + num).c_str(), i);
+        textures[i].texUnit(shaderProgram, ("material." + type + num).c_str(), i);
         textures[i].bind();
     }
     // Take care of the camera Matrix
-    shader.setVec3("viewPos", camera.position);
-    camera.matrix(50.0f, 0.1f, 100.0f, shader);
+    shaderProgram.setVec3("viewPos", camera.position);
+    camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
 
     // Draw the actual mesh
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

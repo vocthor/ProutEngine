@@ -1,53 +1,47 @@
+#pragma once
 
-
-#ifndef SHADER_H
-#define SHADER_H
+#include <format>
+#include <string_view>
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
+#include "autoRelease.hpp"
+
+enum class ShaderType
+{
+    VERTEX,
+    FRAGMENT
+};
 
 class Shader
 {
 public:
-    // the program ID
-    unsigned int ID;
-    // constructor generates the shader on the fly
-    // ------------------------------------------------------------------------
-    Shader(const char *vertexPath, const char *fragmentPath);
-    // activate the shader
-    // ------------------------------------------------------------------------
-    void use();
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const;
-    // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const;
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const;
-    // ------------------------------------------------------------------------
-    void setVec2(const std::string &name, const glm::vec2 &value) const;
-    void setVec2(const std::string &name, float x, float y) const;
-    // ------------------------------------------------------------------------
-    void setVec3(const std::string &name, const glm::vec3 &value) const;
-    void setVec3(const std::string &name, float x, float y, float z) const;
-    // ------------------------------------------------------------------------
-    void setVec4(const std::string &name, const glm::vec4 &value) const;
-    void setVec4(const std::string &name, float x, float y, float z, float w) const;
-    // ------------------------------------------------------------------------
-    void setMat2(const std::string &name, const glm::mat2 &mat) const;
-    // ------------------------------------------------------------------------
-    void setMat3(const std::string &name, const glm::mat3 &mat) const;
-    // ------------------------------------------------------------------------
-    void setMat4(const std::string &name, const glm::mat4 &mat) const;
+    Shader(std::string_view sourcePath, ShaderType type);
+    ShaderType type() const;
+    ::GLuint nativeHandle() const;
 
 private:
-    // utility function for checking shader compilation/linking errors.
-    // ------------------------------------------------------------------------
-    void checkCompileErrors(unsigned int shader, std::string type);
+    void checkCompileErrors() const;
+
+    AutoRelease<::GLuint> handle_;
+    ShaderType type_;
 };
-#endif
+
+template <>
+struct std::formatter<ShaderType>
+{
+    constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+
+    auto format(const ShaderType &type, std::format_context &ctx) const
+    {
+        switch (type)
+        {
+            using enum ShaderType;
+        case VERTEX:
+            return std::format_to(ctx.out(), "VERTEX");
+        case FRAGMENT:
+            return std::format_to(ctx.out(), "FRAGMENT");
+        }
+        throw std::format_error("invalid shader type"); // TODO : my own error type ?
+    }
+};

@@ -9,7 +9,7 @@ class Model
 {
 public:
     Model(char *path);
-    void draw(Shader &shader, Camera &camera);
+    void draw(ShaderProgram &shaderProgram, Camera &camera);
 
 private:
     // model data

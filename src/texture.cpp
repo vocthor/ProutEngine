@@ -54,13 +54,13 @@ Texture::Texture(const std::string image, const std::string texType, GLenum pixe
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::texUnit(Shader &shader, const char *uniform, GLuint slot)
+void Texture::texUnit(ShaderProgram &shaderProgram, const char *uniform, GLuint slot)
 {
 	unit = slot;
 	// Shader needs to be activated before changing the value of a uniform
-	shader.use();
+	shaderProgram.use();
 	// Sets the value of the uniform
-	shader.setInt(uniform, unit);
+	shaderProgram.setInt(uniform, unit);
 }
 
 void Texture::bind()

@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <stb_image/stb_image.h>
 
-#include "shader.hpp"
+#include "shaderProgram.hpp"
 
 class Texture
 {
@@ -31,11 +31,11 @@ public:
     /**
      * @brief Assigns a texture unit to a texture
      *
-     * @param shader Reference to the main shader program object.
-     * @param uniform Name of the sampler2D uniform to use in the fragment shader.
+     * @param shaderProgram Reference to the main shaderProgram program object.
+     * @param uniform Name of the sampler2D uniform to use in the fragment shaderProgram.
      * @param slot Texture unit slot to link this Texture to. Usually similar as the slot used (cf constructor).
      */
-    void texUnit(Shader &shader, const char *uniform, GLuint slot);
+    void texUnit(ShaderProgram &shaderProgram, const char *uniform, GLuint slot);
 
     // Binds a texture
     void bind();

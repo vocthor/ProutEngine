@@ -8,10 +8,10 @@ Model::Model(char *path)
     loadModel(path);
 }
 
-void Model::draw(Shader &shader, Camera &camera)
+void Model::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
     for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw(shader, camera);
+        meshes[i].draw(shaderProgram, camera);
 }
 
 void Model::loadModel(std::string path)

@@ -11,7 +11,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/vector_angle.hpp>
 
-#include "shader.hpp"
+#include "shaderProgram.hpp"
 
 class Camera
 {
@@ -37,7 +37,7 @@ public:
 
     // Updates and exports the camera matrix to the Vertex Shader
     // ? TODO : séparer en 2 fonctions (cf tuto yt) ?
-    void matrix(float FOVdeg, float nearPlane, float farPlane, Shader &shader);
+    void matrix(float FOVdeg, float nearPlane, float farPlane, ShaderProgram &shaderProgram);
     // Handles camera inputs
     void inputs(GLFWwindow *window, float deltaTime);
 
