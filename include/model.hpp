@@ -1,5 +1,4 @@
-#ifndef MODEL_H
-#define MODEL_H
+#pragma once
 
 #include <assimp/scene.h>
 
@@ -8,19 +7,17 @@
 class Model
 {
 public:
-    Model(char *path);
+    Model(std::string_view path);
     void draw(ShaderProgram &shaderProgram, Camera &camera);
 
 private:
     // model data
-    std::vector<Mesh> meshes;
-    std::string directory;
-    std::vector<Texture> textures_loaded;
+    std::vector<Mesh> meshes_;
+    std::string directory_;
+    std::vector<Texture> loadedTextures_;
 
-    void loadModel(std::string path);
-    void processNode(aiNode *node, const aiScene *scene);
-    Mesh processMesh(aiMesh *mesh, const aiScene *scene);
-    std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+    void loadModel(std::string_view path);
+    void processNode(::aiNode *node, const ::aiScene *scene);
+    Mesh processMesh(::aiMesh *mesh, const ::aiScene *scene);
+    std::vector<Texture> loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName);
 };
-
-#endif // MODEL_H

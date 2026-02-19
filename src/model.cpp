@@ -3,22 +3,22 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-Model::Model(char *path)
+Model::Model(std::string_view path)
 {
     loadModel(path);
 }
 
 void Model::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
-    for (unsigned int i = 0; i < meshes.size(); i++)
-        meshes[i].draw(shaderProgram, camera);
+    for (unsigned int i = 0; i < meshes_.size(); i++)
+        meshes_[i].draw(shaderProgram, camera);
 }
 
-void Model::loadModel(std::string path)
+void Model::loadModel(std::string_view path)
 {
     // read file via ASSIMP
-    Assimp::Importer importer;
-    const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs); // aiProcess_GenNormals | aiProcess_SplitLargeMeshes | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace
+    ::Assimp::Importer importer;
+    const ::aiScene *scene = importer.ReadFile(path.data(), aiProcess_Triangulate | aiProcess_FlipUVs); // aiProcess_GenNormals | aiProcess_SplitLargeMeshes | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -26,20 +26,20 @@ void Model::loadModel(std::string path)
         return;
     }
     // retrieve the directory path of the filepath
-    directory = path.substr(0, path.find_last_of('/'));
-    std::cout << "Loading model from " << directory << std::endl;
+    directory_ = path.substr(0, path.find_last_of('/'));
+    std::cout << "Loading model from " << directory_ << std::endl;
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene)
+void Model::processNode(::aiNode *node, const ::aiScene *scene)
 {
     std::cout << "Processing node  " << node->mName.C_Str() << std::endl;
     // process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
-        aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-        meshes.push_back(processMesh(mesh, scene));
+        ::aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+        meshes_.push_back(processMesh(mesh, scene));
     }
     // then do the same for each of its children
     for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -48,7 +48,7 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     }
 }
 
-Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
+Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
 {
     std::cout << "\tProcessing mesh  " << mesh->mName.C_Str() << std::endl;
     std::vector<Vertex> vertices;
@@ -91,7 +91,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     /***** Indices *****/
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
-        aiFace face = mesh->mFaces[i];
+        ::aiFace face = mesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
     }
@@ -99,7 +99,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     /***** Material *****/
     if (mesh->mMaterialIndex >= 0)
     {
-        aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+        ::aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
         // 1. diffuse maps
         std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
@@ -111,22 +111,22 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     return Mesh(vertices, indices, textures);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
+std::vector<Texture> Model::loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName)
 {
     std::vector<Texture> textures;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
-        aiString str;
+        ::aiString str;
         mat->GetTexture(type, i, &str);
-        std::string _path = directory + "/" + str.C_Str();
+        std::string _path = directory_ + "/" + str.C_Str();
         std::cout << "\t\tLoading texture " << _path << " on " << typeName << i;
         bool skip = false;
-        for (unsigned int j = 0; j < textures_loaded.size(); j++)
+        for (unsigned int j = 0; j < loadedTextures_.size(); j++)
         {
-            if (textures_loaded[j].path == _path)
+            if (loadedTextures_[j].path == _path)
             {
                 std::cout << std::endl;
-                textures.push_back(textures_loaded[j]);
+                textures.push_back(loadedTextures_[j]);
                 skip = true;
                 break;
             }
@@ -135,7 +135,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         { // if texture hasn't been loaded already, load it
             Texture texture(_path, typeName);
             textures.push_back(texture);
-            textures_loaded.push_back(texture); // add to loaded textures
+            loadedTextures_.push_back(texture); // add to loaded textures
             std::cout << " (NEW)" << std::endl;
         }
     }
