@@ -4,7 +4,10 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "autoRelease.hpp"
+
 // Structure to standardize the vertices used in the meshes
+// TODO : define my own Vector3, ... data structures
 struct Vertex
 {
     glm::vec3 position = glm::vec3(0.0f);  // default value to prevent uninitialized data
@@ -16,8 +19,7 @@ struct Vertex
 class VBO
 {
 public:
-    // Reference ID of the Vertex Buffer Object
-    ::GLuint ID;
+    AutoRelease<::GLuint> handle_;
     // Constructor that generates a Vertex Buffer Object and links it to vertices
     VBO(std::vector<Vertex> &vertices);
 
@@ -25,6 +27,4 @@ public:
     void bind();
     // Unbinds the VBO
     void unbind();
-    // Deletes the VBO
-    void remove();
 };

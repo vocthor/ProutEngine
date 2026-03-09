@@ -53,13 +53,3 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     vao.unbind();
 }
-
-void Mesh::remove()
-{
-    // ! TODO : VBO and EBO as attributes ? !
-    vao.remove();
-    for (Texture &t : textures)
-    {
-        t.remove();
-    }
-}

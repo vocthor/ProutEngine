@@ -1,5 +1,4 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
 #include "VAO.hpp"
 #include "EBO.hpp"
@@ -11,15 +10,12 @@ class Mesh
 public:
     // mesh data
     std::vector<Vertex> vertices;
-    std::vector<GLuint> indices;
+    std::vector<::GLuint> indices;
     std::vector<Texture> textures;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
     void draw(ShaderProgram &shaderProgram, Camera &camera);
-    void remove();
 
 private:
     VAO vao;
 };
-
-#endif

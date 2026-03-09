@@ -8,7 +8,7 @@ class AutoRelease
 {
 public:
     AutoRelease()
-        : AutoRelease({}, nullptr)
+        : AutoRelease(Invalid, nullptr)
     {
     }
 
@@ -19,7 +19,7 @@ public:
 
     ~AutoRelease()
     {
-        if (obj_ != Invalid && releaseFunc_)
+        if ((obj_ != Invalid) && releaseFunc_)
         {
             releaseFunc_(obj_);
         }
@@ -51,6 +51,11 @@ public:
     T get() const { return obj_; }
 
     operator T() const { return obj_; }
+
+    T *operator&() noexcept
+    {
+        return std::addressof(obj_);
+    }
 
 private:
     T obj_;
