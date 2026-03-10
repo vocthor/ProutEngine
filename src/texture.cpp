@@ -1,80 +1,62 @@
 #include "texture.hpp"
 
-Texture::Texture(const std::string image, const std::string texType, GLenum pixelType)
+#include <iostream>
+
+#include <stb_image/stb_image.h>
+
+Texture::Texture(const std::string &path, ::GLenum pixelType)
+	: handle_{0z, [](::GLuint h)
+			  { ::glDeleteTextures(1, &h); }},
+	  path_{path}, format_{GL_RGB}
 {
-	path = image;
-	type = texType;
+	::glGenTextures(1, &handle_);
 
-	// Generates an OpenGL texture object
-	glGenTextures(1, &ID);
-
-	// Stores the width, height, and the number of color channels of the image
 	int widthImg, heightImg, numColCh;
-	// Flips the image so it appears right side up
 	stbi_set_flip_vertically_on_load(true);
-	// Reads the image from a file and stores it in bytes
-	unsigned char *bytes = stbi_load(image.c_str(), &widthImg, &heightImg, &numColCh, 0);
+	unsigned char *bytes = stbi_load(path.c_str(), &widthImg, &heightImg, &numColCh, 0);
 	if (bytes)
 	{
 		if (numColCh == 1)
-			format = GL_RED;
+			format_ = GL_RED;
 		else if (numColCh == 3)
-			format = GL_RGB;
+			format_ = GL_RGB;
 		else if (numColCh == 4)
-			format = GL_RGBA;
+			format_ = GL_RGBA;
 
 		// Assigns the texture to a Texture Unit
-		glBindTexture(GL_TEXTURE_2D, ID);
+		::glBindTexture(GL_TEXTURE_2D, handle_);
 		// Assigns the image to the OpenGL Texture object
-		glTexImage2D(GL_TEXTURE_2D, 0, format, widthImg, heightImg, 0, format, pixelType, bytes);
+		::glTexImage2D(GL_TEXTURE_2D, 0, format_, widthImg, heightImg, 0, format_, pixelType, bytes);
 		// Generates MipMaps
-		glGenerateMipmap(GL_TEXTURE_2D);
+		::glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Configures the type of algorithm that is used to make the image smaller or bigger
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		// Configures the way the texture repeats (if it does at all)
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-		// Extra lines in case you choose to use GL_CLAMP_TO_BORDER
-		// float flatColor[] = {1.0f, 1.0f, 1.0f, 1.0f};
-		// glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, flatColor);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		::glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 	else
 	{
-		std::cout << "Failed to load texture : " << image << std::endl;
+		std::cerr << "Failed to load texture: " << path << std::endl;
 	}
 
 	// Deletes the image data as it is already in the OpenGL Texture object
 	stbi_image_free(bytes);
 
 	// Unbinds the OpenGL Texture object so that it can't accidentally be modified
-	glBindTexture(GL_TEXTURE_2D, 0);
+	::glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture::texUnit(ShaderProgram &shaderProgram, const char *uniform, GLuint slot)
+void Texture::bind(::GLuint unit) const
 {
-	unit = slot;
-	// Shader needs to be activated before changing the value of a uniform
-	shaderProgram.use();
-	// Sets the value of the uniform
-	shaderProgram.setInt(uniform, unit);
+	::glActiveTexture(GL_TEXTURE0 + unit);
+	::glBindTexture(GL_TEXTURE_2D, handle_);
 }
 
-void Texture::bind()
+void Texture::unbind() const
 {
-	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(GL_TEXTURE_2D, ID);
-}
-
-void Texture::unbind()
-{
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Texture::remove()
-{
-	glDeleteTextures(1, &ID);
+	::glBindTexture(GL_TEXTURE_2D, 0);
 }

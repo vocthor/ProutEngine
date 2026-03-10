@@ -3,7 +3,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-Model::Model(std::string_view path)
+Model::Model(std::string_view path, TextureManager &textureManager)
+    : textureManager_{textureManager}
 {
     loadModel(path);
 }
@@ -11,7 +12,7 @@ Model::Model(std::string_view path)
 void Model::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
     for (unsigned int i = 0; i < meshes_.size(); i++)
-        meshes_[i].draw(shaderProgram, camera);
+        meshes_[i].draw(shaderProgram, camera, textureManager_);
 }
 
 void Model::loadModel(std::string_view path)
@@ -53,7 +54,7 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
     std::cout << "\tProcessing mesh  " << mesh->mName.C_Str() << std::endl;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
+    std::vector<TextureRef> texturesRefs;
 
     /***** Vertices *****/
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -99,42 +100,28 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
     /***** Material *****/
     ::aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
     // 1. diffuse maps
-    std::vector<Texture> diffuseMaps = loadMaterialTextures(material, ::aiTextureType_DIFFUSE, "texture_diffuse");
-    textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+    std::vector<TextureRef> diffuseMaps = loadMaterialTextures(material, ::aiTextureType_DIFFUSE, "texture_diffuse");
+    texturesRefs.insert(texturesRefs.end(), diffuseMaps.begin(), diffuseMaps.end());
     // 2. specular maps
-    std::vector<Texture> specularMaps = loadMaterialTextures(material, ::aiTextureType_SPECULAR, "texture_specular");
-    textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+    std::vector<TextureRef> specularMaps = loadMaterialTextures(material, ::aiTextureType_SPECULAR, "texture_specular");
+    texturesRefs.insert(texturesRefs.end(), specularMaps.begin(), specularMaps.end());
 
-    return Mesh(vertices, indices, textures);
+    return Mesh(vertices, indices, texturesRefs);
 }
 
-std::vector<Texture> Model::loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName)
+std::vector<TextureRef> Model::loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName)
 {
-    std::vector<Texture> textures;
+    std::vector<TextureRef> texturesRefs;
     for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
         ::aiString str;
         mat->GetTexture(type, i, &str);
         std::string _path = directory_ + "/" + str.C_Str();
         std::cout << "\t\tLoading texture " << _path << " on " << typeName << i;
-        bool skip = false;
-        for (unsigned int j = 0; j < loadedTextures_.size(); j++)
-        {
-            if (loadedTextures_[j].name_ == _path)
-            {
-                std::cout << std::endl;
-                textures.push_back(loadedTextures_[j]);
-                skip = true;
-                break;
-            }
-        }
-        if (!skip)
-        { // if texture hasn't been loaded already, load it
-            Texture texture(_path, typeName);
-            textures.push_back(texture);
-            loadedTextures_.push_back(texture); // add to loaded textures
-            std::cout << " (NEW)" << std::endl;
-        }
+        TextureHandle handle = textureManager_.load(_path);
+        texturesRefs.push_back({.handle = handle,
+                                .type = typeName});
+        std::cout << std::endl;
     }
-    return textures;
+    return texturesRefs;
 }

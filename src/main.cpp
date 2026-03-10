@@ -12,6 +12,7 @@
 #include "autoRelease.hpp"
 #include "mesh.hpp"
 #include "model.hpp"
+#include "textureManager.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -164,17 +165,12 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
     glEnable(GL_STENCIL_TEST);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
 
     // load models
     // -----------
-    Model ourModel("resources/models/backpack/backpack.obj");
-
-    // textures
-    // --------
-    Texture textures[]{
-        Texture("resources/textures/container2.png", "texture_diffuse"),
-        Texture("resources/textures/container2_specular.png", "texture_specular"),
-    };
+    TextureManager textureManager;
+    Model ourModel("resources/models/backpack/backpack.obj", textureManager);
 
     // build and compile our shader program
     // ------------------------------------
@@ -183,7 +179,10 @@ int main()
     ShaderProgram shaderProgram(vertexShader, fragmentShader);
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
-    std::vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
+    std::vector<TextureRef> tex{
+        {textureManager.load("resources/textures/container2.png"), "texture_diffuse"},
+        {textureManager.load("resources/textures/container2_specular.png"), "texture_specular"},
+    };
     Mesh cube(verts, ind, tex);
     std::cout << "Shader program default created.\n";
 
@@ -293,7 +292,7 @@ int main()
         //     shaderProgram.setMat4("model", localCubeModel);
         //     shaderProgram.setMat3("normal", localCubeNormal);
 
-        //     cube.draw(shaderProgram, camera);
+        //     cube.draw(shaderProgram, camera, textureManager);
         // }
 
         // lightShader.use();
@@ -304,7 +303,7 @@ int main()
         //     localLightModel = glm::scale(localLightModel, glm::vec3(0.2f)); // Make it a smaller cube
         //     lightShader.setMat4("model", localLightModel);
 
-        //     light.draw(lightShader, camera);
+        //     light.draw(lightShader, camera, textureManager);
         // }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

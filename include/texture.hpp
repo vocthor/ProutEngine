@@ -1,49 +1,24 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
+
+#include <string>
 
 #include <glad/glad.h>
-#include <stb_image/stb_image.h>
 
-#include "shaderProgram.hpp"
+#include "autoRelease.hpp"
 
 class Texture
 {
 public:
-    GLuint ID;
-    std::string path;
-    std::string type;
-    GLuint unit;
-    /**
-     * @brief Format of the image. `GL_RGB` for jpg, `GL_RGBA` for png.
-     */
-    GLenum format;
+    Texture(const std::string &path, ::GLenum pixelType = GL_UNSIGNED_BYTE);
 
-    /**
-     * @brief Construct a new Texture object
-     *
-     * @param image Path to the image file
-     * @param texType Is it a 1D, 2D or 3D texture ?
-     * @param slot Which unit slot to use (in a case of multiple textures)
-     * @param pixelType Usually GL_UNSIGNED_BYTE
-     */
-    Texture(const std::string image, const std::string texType, GLenum pixelType = GL_UNSIGNED_BYTE);
+    void bind(::GLuint unit) const;
+    void unbind() const;
 
-    /**
-     * @brief Assigns a texture unit to a texture
-     *
-     * @param shaderProgram Reference to the main shaderProgram program object.
-     * @param uniform Name of the sampler2D uniform to use in the fragment shaderProgram.
-     * @param slot Texture unit slot to link this Texture to. Usually similar as the slot used (cf constructor).
-     */
-    void texUnit(ShaderProgram &shaderProgram, const char *uniform, GLuint slot);
+    ::GLuint handle() const { return handle_.get(); }
+    const std::string &path() const { return path_; }
 
-    // Binds a texture
-    void bind();
-
-    // Unbinds a texture
-    void unbind();
-
-    // Deletes a texture
-    void remove();
+private:
+    AutoRelease<::GLuint> handle_;
+    std::string path_;
+    ::GLenum format_;
 };
-#endif

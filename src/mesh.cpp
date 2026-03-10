@@ -1,8 +1,11 @@
 #include "mesh.hpp"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
-    : vertices{vertices}, indices{indices}, textures{textures},
-      vbo_{vertices}, ebo_{indices}
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureRef> texturesRefs)
+    : vertices{std::move(vertices)},
+      indices{std::move(indices)},
+      texturesRefs{std::move(texturesRefs)},
+      vbo_{this->vertices}, // ! Mind the move() on the parameter before
+      ebo_{this->indices}   // ! Mind the move() on the parameter before
 {
     vao_.bind();
     ebo_.bind();
@@ -17,7 +20,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     ebo_.unbind();
 }
 
-void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
+void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &textureManager)
 {
     // Bind shaderProgram to be able to access uniforms
     shaderProgram.use();
@@ -27,18 +30,18 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
     unsigned int numDiffuse = 0;
     unsigned int numSpecular = 0;
 
-    for (unsigned int i = 0; i < textures.size(); i++)
+    for (unsigned int i = 0; i < texturesRefs.size(); i++)
     {
         std::string num;
-        std::string type = textures[i].type;
+        const std::string &type = texturesRefs[i].type;
 
         if (type == "texture_diffuse")
             num = std::to_string(numDiffuse++);
         else if (type == "texture_specular")
             num = std::to_string(numSpecular++);
 
-        textures[i].texUnit(shaderProgram, ("material." + type + num).c_str(), i);
-        textures[i].bind();
+        shaderProgram.setInt(("material." + type + num).c_str(), i);
+        textureManager.get(texturesRefs[i].handle).bind(i);
     }
     // Take care of the camera Matrix
     shaderProgram.setVec3("viewPos", camera.position);
