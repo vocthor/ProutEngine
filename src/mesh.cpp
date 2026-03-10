@@ -1,32 +1,27 @@
 #include "mesh.hpp"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+    : vertices{vertices}, indices{indices}, textures{textures},
+      vbo_{vertices}, ebo_{indices}
 {
-    Mesh::vertices = vertices;
-    Mesh::indices = indices;
-    Mesh::textures = textures;
-
-    vao.bind();
-    // Generates Vertex Buffer Object and links it to vertices
-    VBO VBO(vertices);
-    // Generates Element Buffer Object and links it to indices
-    EBO EBO(indices);
+    vao_.bind();
+    ebo_.bind();
     // Links VBO attributes such as coordinates and colors to VAO
-    vao.linkAttrib(VBO, 0, 3, GL_FLOAT, sizeof(Vertex), (void *)0);                           // Position
-    vao.linkAttrib(VBO, 1, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, normal));    // Normal
-    vao.linkAttrib(VBO, 2, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));     // Color
-    vao.linkAttrib(VBO, 3, 2, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, texCoords)); // Texture coords
+    vao_.linkAttrib(vbo_, 0, 3, GL_FLOAT, sizeof(Vertex), (void *)0);                           // Position
+    vao_.linkAttrib(vbo_, 1, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, normal));    // Normal
+    vao_.linkAttrib(vbo_, 2, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));     // Color
+    vao_.linkAttrib(vbo_, 3, 2, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, texCoords)); // Texture coords
     // Unbind all to prevent accidentally modifying them
-    vao.unbind();
-    VBO.unbind();
-    EBO.unbind();
+    vao_.unbind();
+    vbo_.unbind();
+    ebo_.unbind();
 }
 
 void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
     // Bind shaderProgram to be able to access uniforms
     shaderProgram.use();
-    vao.bind();
+    vao_.bind();
 
     // Keep track of how many of each type of textures we have
     unsigned int numDiffuse = 0;
@@ -51,5 +46,5 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera)
 
     // Draw the actual mesh
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    vao.unbind();
+    vao_.unbind();
 }

@@ -17,5 +17,7 @@ public:
     void draw(ShaderProgram &shaderProgram, Camera &camera);
 
 private:
-    VAO vao;
+    VAO vao_;
+    VBO vbo_;
+    EBO ebo_;
 };
