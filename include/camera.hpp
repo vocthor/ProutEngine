@@ -1,5 +1,4 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -47,4 +46,3 @@ private:
     float lastX;
     float lastY;
 };
-#endif
