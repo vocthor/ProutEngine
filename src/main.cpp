@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "autoRelease.hpp"
+#include "core/timer.hpp"
 #include "core/window.hpp"
 #include "mesh.hpp"
 #include "utils/log.hpp"
@@ -20,10 +21,6 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
-// timing
-float deltaTime = 0.0f; // time between current frame and last frame
-float lastFrame = 0.0f;
 
 // Vertices coordinates
 // * Need 24 vertexes because normals cannot be shared between faces
@@ -213,21 +210,19 @@ int main()
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 
+    Timer timer;
+
     // render loop
     // -----------
     while (!window.shouldClose())
     {
-        // per-frame time logic
-        // --------------------
-        float currentFrame = static_cast<float>(glfwGetTime());
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+        timer.update();
 
         // input
         // -----
         //! fusionner
         processInput(window.handle());
-        camera.inputs(window.handle(), deltaTime);
+        camera.inputs(window.handle(), timer.deltaTime());
 
         // render
         // ------
