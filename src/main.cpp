@@ -1,7 +1,6 @@
 
 
 #include <cmath>
-#include <iostream>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,6 +11,7 @@
 #include "autoRelease.hpp"
 #include "core/window.hpp"
 #include "mesh.hpp"
+#include "utils/log.hpp"
 #include "model.hpp"
 #include "textureManager.hpp"
 
@@ -155,7 +155,7 @@ int main()
         {textureManager.load("resources/textures/container2_specular.png"), "texture_specular"},
     };
     Mesh cube(verts, ind, tex);
-    std::cout << "Shader program default created.\n";
+    Log::info("Shader program default created.");
 
     // light shader
     // ------------
@@ -165,7 +165,7 @@ int main()
     std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
     std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
     Mesh light(lightVerts, lightInd, {});
-    std::cout << "Shader program light created.\n";
+    Log::info("Shader program light created.");
 
     // light cube parametrization
     // --------------------------
@@ -205,11 +205,11 @@ int main()
     shaderProgram.setFloat("spotLight.quadratic", 0.032f);
     shaderProgram.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
     shaderProgram.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
-    std::cout << "Shader program default setup.\n";
+    Log::info("Shader program default setup.");
 
     lightShader.use();
     lightShader.setVec3("lightColor", lightColor);
-    std::cout << "Shader program light setup.\n";
+    Log::info("Shader program light setup.");
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 

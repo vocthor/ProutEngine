@@ -1,8 +1,8 @@
 #include "texture.hpp"
 
-#include <iostream>
-
 #include <stb_image/stb_image.h>
+
+#include "utils/log.hpp"
 
 Texture::Texture(const std::string &path, ::GLenum pixelType)
 	: handle_{0z, [](::GLuint h)
@@ -40,7 +40,7 @@ Texture::Texture(const std::string &path, ::GLenum pixelType)
 	}
 	else
 	{
-		std::cerr << "Failed to load texture: " << path << std::endl;
+		Log::error("Failed to load texture: {}", path);
 	}
 
 	// Deletes the image data as it is already in the OpenGL Texture object

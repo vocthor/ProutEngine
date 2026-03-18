@@ -3,6 +3,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "utils/log.hpp"
+
 Model::Model(std::string_view path, TextureManager &textureManager)
     : textureManager_{textureManager}
 {
@@ -23,19 +25,19 @@ void Model::loadModel(std::string_view path)
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
-        std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
+        Log::error("ASSIMP: {}", importer.GetErrorString());
         return;
     }
     // retrieve the directory path of the filepath
     directory_ = path.substr(0, path.find_last_of('/'));
-    std::cout << "Loading model from " << directory_ << std::endl;
+    Log::info("Loading model from {}", directory_);
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 }
 
 void Model::processNode(::aiNode *node, const ::aiScene *scene)
 {
-    std::cout << "Processing node " << node->mName.C_Str() << std::endl;
+    Log::debug("Processing node {}", node->mName.C_Str());
     // process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
@@ -51,7 +53,7 @@ void Model::processNode(::aiNode *node, const ::aiScene *scene)
 
 Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
 {
-    std::cout << "\tProcessing mesh  " << mesh->mName.C_Str() << std::endl;
+    Log::debug("Processing mesh {}", mesh->mName.C_Str());
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<TextureRef> texturesRefs;
@@ -117,11 +119,10 @@ std::vector<TextureRef> Model::loadMaterialTextures(::aiMaterial *mat, ::aiTextu
         ::aiString str;
         mat->GetTexture(type, i, &str);
         std::string _path = directory_ + "/" + str.C_Str();
-        std::cout << "\t\tLoading texture " << _path << " on " << typeName << i;
+        Log::debug("Loading texture {} on {}{}", _path, typeName, i);
         TextureHandle handle = textureManager_.load(_path);
         texturesRefs.push_back({.handle = handle,
                                 .type = typeName});
-        std::cout << std::endl;
     }
     return texturesRefs;
 }
