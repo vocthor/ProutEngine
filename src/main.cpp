@@ -11,12 +11,11 @@
 #include "autoRelease.hpp"
 #include "core/timer.hpp"
 #include "core/window.hpp"
+#include "input/inputManager.hpp"
 #include "mesh.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
 #include "textureManager.hpp"
-
-void processInput(GLFWwindow *window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -211,17 +210,24 @@ int main()
     Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
 
     Timer timer;
+    InputManager inputManager(window.handle());
+
+    // Discrete events — subscriptions
+    auto escConn = inputManager
+                       .key(GLFW_KEY_ESCAPE)
+                       .pressed
+                       .connect([&]
+                                { glfwSetWindowShouldClose(window.handle(), true); });
 
     // render loop
     // -----------
     while (!window.shouldClose())
     {
         timer.update();
+        inputManager.update();
 
         // input
         // -----
-        //! fusionner
-        processInput(window.handle());
         camera.inputs(window.handle(), timer.deltaTime());
 
         // render
@@ -279,12 +285,4 @@ int main()
     }
 
     return 0;
-}
-
-// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
 }
