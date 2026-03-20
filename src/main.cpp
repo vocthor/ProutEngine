@@ -15,6 +15,7 @@
 #include "mesh.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
+#include "cameraController.hpp"
 #include "textureManager.hpp"
 
 // settings
@@ -211,6 +212,7 @@ int main()
 
     Timer timer;
     InputManager inputManager(window.handle());
+    CameraController cameraController(camera, inputManager);
 
     // Discrete events — subscriptions
     auto escConn = inputManager
@@ -228,7 +230,7 @@ int main()
 
         // input
         // -----
-        camera.inputs(window.handle(), timer.deltaTime());
+        cameraController.update(timer.deltaTime());
 
         // render
         // ------
