@@ -8,8 +8,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "autoRelease.hpp"
-#include "shader.hpp"
+#include "utils/autoRelease.hpp"
+#include "render/shader.hpp"
 
 class ShaderProgram
 {

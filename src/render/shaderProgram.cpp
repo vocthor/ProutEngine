@@ -1,4 +1,4 @@
-#include "shaderProgram.hpp"
+#include "render/shaderProgram.hpp"
 
 namespace
 {

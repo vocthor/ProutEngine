@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 #include <vector>
 
-#include "autoRelease.hpp"
+#include "utils/autoRelease.hpp"
 
 class EBO
 {

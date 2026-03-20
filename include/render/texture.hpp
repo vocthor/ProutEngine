@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-#include "autoRelease.hpp"
+#include "utils/autoRelease.hpp"
 
 class Texture
 {

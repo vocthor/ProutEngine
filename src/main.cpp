@@ -8,11 +8,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "autoRelease.hpp"
+#include "utils/autoRelease.hpp"
 #include "core/timer.hpp"
 #include "core/window.hpp"
 #include "input/inputManager.hpp"
-#include "mesh.hpp"
+#include "render/mesh.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
 #include "cameraController.hpp"

@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "texture.hpp"
+#include "render/texture.hpp"
 
 enum class TextureHandle : std::uint32_t
 {

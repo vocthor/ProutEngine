@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#include "autoRelease.hpp"
+#include "utils/autoRelease.hpp"
 
 // Structure to standardize the vertices used in the meshes
 // TODO : define my own Vector3, ... data structures

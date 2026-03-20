@@ -2,7 +2,7 @@
 
 #include <assimp/scene.h>
 
-#include "mesh.hpp"
+#include "render/mesh.hpp"
 
 class Model
 {

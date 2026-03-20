@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include "render/mesh.hpp"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureRef> texturesRefs)
     : vertices{std::move(vertices)},

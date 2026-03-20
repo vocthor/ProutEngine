@@ -1,8 +1,8 @@
 #pragma once
 
 #include <glad/glad.h>
-#include "autoRelease.hpp"
-#include "VBO.hpp"
+#include "utils/autoRelease.hpp"
+#include "render/VBO.hpp"
 
 class VAO
 {

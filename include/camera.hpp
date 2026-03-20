@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "shaderProgram.hpp"
+#include "render/shaderProgram.hpp"
 
 class Camera
 {

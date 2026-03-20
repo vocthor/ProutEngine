@@ -1,4 +1,4 @@
-#include "EBO.hpp"
+#include "render/EBO.hpp"
 
 // Constructor that generates a Elements Buffer Object and links it to indices
 EBO::EBO(std::vector<::GLuint> &indices)

@@ -1,4 +1,4 @@
-#include "VAO.hpp"
+#include "render/VAO.hpp"
 
 // Constructor that generates a VAO ID
 VAO::VAO()
