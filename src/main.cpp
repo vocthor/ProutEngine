@@ -13,7 +13,7 @@
 #include "core/window.hpp"
 #include "input/inputManager.hpp"
 #include "render/mesh.hpp"
-#include "scene/light.hpp"
+#include "scene/scene.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
 #include "cameraController.hpp"
@@ -120,43 +120,41 @@ GLuint lightIndices[] = {
     4, 5, 6,
     4, 6, 7};
 
-glm::vec3 pointLightPositions[] = {
-    glm::vec3(0.7f, 0.2f, 2.0f),
-    glm::vec3(2.3f, -3.3f, -4.0f),
-};
+// Scene
+Scene scene(Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f)));
 
-// Scene lights
-const DirectionalLight dirLight{
-    .direction = {-0.2f, -1.0f, -0.3f},
-    .ambient = {0.05f, 0.05f, 0.2f},
-    .diffuse = {0.25f, 0.25f, 1.0f},
-    .specular = {0.5f, 0.5f, 0.5f},
-};
+static void initSceneLights()
+{
+    scene.directionalLight = {
+        .direction = {-0.2f, -1.0f, -0.3f},
+        .ambient = {0.05f, 0.05f, 0.2f},
+        .diffuse = {0.25f, 0.25f, 1.0f},
+        .specular = {0.5f, 0.5f, 0.5f},
+    };
 
-const PointLight pointLights[] = {
-    {
-        .position = pointLightPositions[0],
-        .ambient = {0.05f, 0.2f, 0.05f},
-        .diffuse = {0.25f, 1.0f, 0.25f},
+    scene.pointLights = {
+        {
+            .position = {0.7f, 0.2f, 2.0f},
+            .ambient = {0.05f, 0.2f, 0.05f},
+            .diffuse = {0.25f, 1.0f, 0.25f},
+            .specular = {1.0f, 1.0f, 1.0f},
+        },
+        {
+            .position = {2.3f, -3.3f, -4.0f},
+            .ambient = {0.2f, 0.05f, 0.05f},
+            .diffuse = {1.0f, 0.25f, 0.25f},
+            .specular = {1.0f, 1.0f, 1.0f},
+        },
+    };
+
+    scene.spotLight = {
+        .position = {0.f, 0.f, 0.f},
+        .direction = {0.f, 0.f, -1.f},
+        .ambient = {0.0f, 0.0f, 0.0f},
+        .diffuse = {1.0f, 1.0f, 1.0f},
         .specular = {1.0f, 1.0f, 1.0f},
-    },
-    {
-        .position = pointLightPositions[1],
-        .ambient = {0.2f, 0.05f, 0.05f},
-        .diffuse = {1.0f, 0.25f, 0.25f},
-        .specular = {1.0f, 1.0f, 1.0f},
-    },
-};
-
-// SpotLight position/direction are updated each frame from the camera
-SpotLight spotLight{
-    .position = {0.f, 0.f, 0.f},   // overwritten each frame from camera
-    .direction = {0.f, 0.f, -1.f}, // overwritten each frame from camera
-    .ambient = {0.0f, 0.0f, 0.0f},
-    .diffuse = {1.0f, 1.0f, 1.0f},
-    .specular = {1.0f, 1.0f, 1.0f},
-    // cutOff / outerCutOff use default values (12.5° / 17.5°)
-};
+    };
+}
 
 int main()
 {
@@ -173,6 +171,11 @@ int main()
     // -----------
     TextureManager textureManager;
     Model ourModel("resources/models/backpack/backpack.obj", textureManager);
+
+    Entity backpack;
+    backpack.name = "Backpack";
+    backpack.model = &ourModel;
+    scene.entities.push_back(std::move(backpack));
 
     // build and compile our shader program
     // ------------------------------------
@@ -206,21 +209,17 @@ int main()
     // -------------
     shaderProgram.use();
     shaderProgram.setFloat("material.shininess", 32.0f);
-    LightUtils::uploadToShader(shaderProgram, dirLight);
-    LightUtils::uploadToShader(shaderProgram, pointLights[0], 0);
-    LightUtils::uploadToShader(shaderProgram, pointLights[1], 1);
-    LightUtils::uploadToShader(shaderProgram, spotLight);
+    initSceneLights();
+    scene.uploadLights(shaderProgram);
     Log::info("Shader program default setup.");
 
     lightShader.use();
     lightShader.setVec3("lightColor", lightColor);
     Log::info("Shader program light setup.");
 
-    Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f));
-
     Timer timer;
     InputManager inputManager(window.handle());
-    CameraController cameraController(camera, inputManager);
+    CameraController cameraController(scene.camera, inputManager);
 
     // Discrete events — subscriptions
     auto escConn = inputManager
@@ -246,20 +245,22 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shaderProgram.use();
-        // Update per-frame spotlight position/direction from camera
-        spotLight.position = camera.position;
-        spotLight.direction = camera.direction;
-        shaderProgram.setVec3("spotLight.position", spotLight.position);
-        shaderProgram.setVec3("spotLight.direction", spotLight.direction);
+        // Update per-frame spotlight position/direction from camera, then re-upload
+        scene.spotLight.position = scene.camera.position;
+        scene.spotLight.direction = scene.camera.direction;
+        LightUtils::uploadToShader(shaderProgram, scene.spotLight);
 
-        // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));     // it's a bit too big for our scene, so scale it down
-        glm::mat3 normal = glm::transpose(glm::inverse(model));
-        shaderProgram.setMat4("model", model);
-        shaderProgram.setMat3("normal", normal);
-        ourModel.draw(shaderProgram, camera);
+        // render scene entities
+        for (auto &entity : scene.entities)
+        {
+            if (!entity.model)
+                continue;
+            const glm::mat4 model = entity.transform.getModelMatrix();
+            const glm::mat3 normal = entity.transform.getNormalMatrix();
+            shaderProgram.setMat4("model", model);
+            shaderProgram.setMat3("normal", normal);
+            entity.model->draw(shaderProgram, scene.camera);
+        }
 
         // // Affichage du cube à toutes les cubePositions
         // for (unsigned int i = 0; i < 10; i++)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <variant>
+
 #include <glm/glm.hpp>
 
 class ShaderProgram; // forward declaration — avoid pulling in heavy headers
@@ -48,6 +50,8 @@ struct SpotLight
     float cutOff = 12.5f;      // inner cone half-angle, in degrees
     float outerCutOff = 17.5f; // outer cone half-angle, in degrees
 };
+
+using Light = std::variant<DirectionalLight, PointLight, SpotLight>;
 
 // -----------------------------------------------------------------------------
 // LightUtils — upload a light struct to a ShaderProgram's uniforms.
