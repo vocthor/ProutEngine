@@ -13,6 +13,7 @@
 #include "core/window.hpp"
 #include "input/inputManager.hpp"
 #include "render/mesh.hpp"
+#include "scene/light.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
 #include "cameraController.hpp"
@@ -124,6 +125,39 @@ glm::vec3 pointLightPositions[] = {
     glm::vec3(2.3f, -3.3f, -4.0f),
 };
 
+// Scene lights
+const DirectionalLight dirLight{
+    .direction = {-0.2f, -1.0f, -0.3f},
+    .ambient = {0.05f, 0.05f, 0.2f},
+    .diffuse = {0.25f, 0.25f, 1.0f},
+    .specular = {0.5f, 0.5f, 0.5f},
+};
+
+const PointLight pointLights[] = {
+    {
+        .position = pointLightPositions[0],
+        .ambient = {0.05f, 0.2f, 0.05f},
+        .diffuse = {0.25f, 1.0f, 0.25f},
+        .specular = {1.0f, 1.0f, 1.0f},
+    },
+    {
+        .position = pointLightPositions[1],
+        .ambient = {0.2f, 0.05f, 0.05f},
+        .diffuse = {1.0f, 0.25f, 0.25f},
+        .specular = {1.0f, 1.0f, 1.0f},
+    },
+};
+
+// SpotLight position/direction are updated each frame from the camera
+SpotLight spotLight{
+    .position = {0.f, 0.f, 0.f},   // overwritten each frame from camera
+    .direction = {0.f, 0.f, -1.f}, // overwritten each frame from camera
+    .ambient = {0.0f, 0.0f, 0.0f},
+    .diffuse = {1.0f, 1.0f, 1.0f},
+    .specular = {1.0f, 1.0f, 1.0f},
+    // cutOff / outerCutOff use default values (12.5° / 17.5°)
+};
+
 int main()
 {
     Window window(SCR_WIDTH, SCR_HEIGHT, "ProutEngine");
@@ -172,36 +206,10 @@ int main()
     // -------------
     shaderProgram.use();
     shaderProgram.setFloat("material.shininess", 32.0f);
-    // directional light
-    shaderProgram.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-    shaderProgram.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.2f);
-    shaderProgram.setVec3("dirLight.diffuse", 0.25f, 0.25f, 1.0f);
-    shaderProgram.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-    // point light 1
-    shaderProgram.setVec3("pointLights[0].position", pointLightPositions[0]);
-    shaderProgram.setVec3("pointLights[0].ambient", 0.05f, 0.2f, 0.05f);
-    shaderProgram.setVec3("pointLights[0].diffuse", 0.25f, 1.0f, 0.25f);
-    shaderProgram.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-    shaderProgram.setFloat("pointLights[0].constant", 1.0f);
-    shaderProgram.setFloat("pointLights[0].linear", 0.09f);
-    shaderProgram.setFloat("pointLights[0].quadratic", 0.032f);
-    // point light 2
-    shaderProgram.setVec3("pointLights[1].position", pointLightPositions[1]);
-    shaderProgram.setVec3("pointLights[1].ambient", 0.2f, 0.05f, 0.05f);
-    shaderProgram.setVec3("pointLights[1].diffuse", 1.0f, 0.25f, 0.25f);
-    shaderProgram.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-    shaderProgram.setFloat("pointLights[1].constant", 1.0f);
-    shaderProgram.setFloat("pointLights[1].linear", 0.09f);
-    shaderProgram.setFloat("pointLights[1].quadratic", 0.032f);
-    // spotLight
-    shaderProgram.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-    shaderProgram.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-    shaderProgram.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-    shaderProgram.setFloat("spotLight.constant", 1.0f);
-    shaderProgram.setFloat("spotLight.linear", 0.09f);
-    shaderProgram.setFloat("spotLight.quadratic", 0.032f);
-    shaderProgram.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    shaderProgram.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+    LightUtils::uploadToShader(shaderProgram, dirLight);
+    LightUtils::uploadToShader(shaderProgram, pointLights[0], 0);
+    LightUtils::uploadToShader(shaderProgram, pointLights[1], 1);
+    LightUtils::uploadToShader(shaderProgram, spotLight);
     Log::info("Shader program default setup.");
 
     lightShader.use();
@@ -238,8 +246,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shaderProgram.use();
-        shaderProgram.setVec3("spotLight.position", camera.position);
-        shaderProgram.setVec3("spotLight.direction", camera.direction);
+        // Update per-frame spotlight position/direction from camera
+        spotLight.position = camera.position;
+        spotLight.direction = camera.direction;
+        shaderProgram.setVec3("spotLight.position", spotLight.position);
+        shaderProgram.setVec3("spotLight.direction", spotLight.direction);
 
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
