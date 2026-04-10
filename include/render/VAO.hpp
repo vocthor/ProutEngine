@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 #include "utils/autoRelease.hpp"
-#include "render/VBO.hpp"
+#include "render/gpuBuffer.hpp"
 
 class VAO
 {

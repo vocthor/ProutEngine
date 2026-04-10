@@ -1,7 +1,7 @@
 #pragma once
 
 #include "render/VAO.hpp"
-#include "render/EBO.hpp"
+#include "render/gpuBuffer.hpp"
 #include "camera.hpp"
 #include "textureManager.hpp"
 
