@@ -8,38 +8,25 @@
 
 namespace LightUtils
 {
-    void uploadToShader(ShaderProgram &shader, const DirectionalLight &light)
+    void uploadToShader(ShaderProgram &shader, std::span<const Light> lights)
     {
-        shader.setVec3("dirLight.direction", light.direction);
-        shader.setVec3("dirLight.ambient", light.ambient);
-        shader.setVec3("dirLight.diffuse", light.diffuse);
-        shader.setVec3("dirLight.specular", light.specular);
-    }
+        shader.setInt("numLights", lights.size());
 
-    void uploadToShader(ShaderProgram &shader, const PointLight &light, int index)
-    {
-        const std::string base = std::format("pointLights[{}].", index);
-        shader.setVec3(base + "position", light.position);
-        shader.setVec3(base + "ambient", light.ambient);
-        shader.setVec3(base + "diffuse", light.diffuse);
-        shader.setVec3(base + "specular", light.specular);
-        shader.setFloat(base + "constant", light.constant);
-        shader.setFloat(base + "linear", light.linear);
-        shader.setFloat(base + "quadratic", light.quadratic);
-    }
+        for (size_t i = 0; i < lights.size(); ++i)
+        {
+            const auto &l = lights[i];
+            const std::string base = std::format("lights[{}].", i);
 
-    void uploadToShader(ShaderProgram &shader, const SpotLight &light)
-    {
-        shader.setVec3("spotLight.position", light.position);
-        shader.setVec3("spotLight.direction", light.direction);
-        shader.setVec3("spotLight.ambient", light.ambient);
-        shader.setVec3("spotLight.diffuse", light.diffuse);
-        shader.setVec3("spotLight.specular", light.specular);
-        shader.setFloat("spotLight.constant", light.constant);
-        shader.setFloat("spotLight.linear", light.linear);
-        shader.setFloat("spotLight.quadratic", light.quadratic);
-        // Shader expects cosines, we store degrees for ergonomics
-        shader.setFloat("spotLight.cutOff", glm::cos(glm::radians(light.cutOff)));
-        shader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(light.outerCutOff)));
+            shader.setInt(base + "type", static_cast<int>(l.type));
+            shader.setVec3(base + "color", l.color);
+            shader.setFloat(base + "intensity", l.intensity);
+            shader.setVec3(base + "position", l.position);
+            shader.setVec3(base + "direction", l.direction);
+            shader.setFloat(base + "constant", l.constant);
+            shader.setFloat(base + "linear", l.linear);
+            shader.setFloat(base + "quadratic", l.quadratic);
+            shader.setFloat(base + "cutOff", glm::cos(glm::radians(l.cutOff)));
+            shader.setFloat(base + "outerCutOff", glm::cos(glm::radians(l.outerCutOff)));
+        }
     }
 } // namespace LightUtils

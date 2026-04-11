@@ -1,69 +1,51 @@
 #pragma once
 
-#include <variant>
-
 #include <glm/glm.hpp>
+#include <span>
 
-class ShaderProgram; // forward declaration — avoid pulling in heavy headers
+class ShaderProgram;
 
 // -----------------------------------------------------------------------------
-// Light structs — fields match the GLSL uniforms in fs_default.glsl exactly.
-// Ambient/diffuse/specular follow the Phong shading model.
+// Unified light model — color × intensity instead of ambient/diffuse/specular.
+// Prepares the transition to PBR (6.11): the shader receives radiance directly.
 // -----------------------------------------------------------------------------
 
-struct DirectionalLight
-{
-    glm::vec3 direction;
+inline constexpr int MAX_LIGHTS = 16;
 
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+enum class LightType : int
+{
+    DIRECTIONAL = 0,
+    POINT = 1,
+    SPOT = 2
 };
 
-struct PointLight
+struct Light
 {
-    glm::vec3 position;
+    LightType type = LightType::POINT;
 
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    glm::vec3 color = glm::vec3(1.0f);
+    float intensity = 1.0f;
 
-    // Attenuation coefficients (see https://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation)
-    float constant = 1.0f;
-    float linear = 0.09f;
-    float quadratic = 0.032f;
-};
+    // Position (POINT/SPOT) — ignored for DIRECTIONAL
+    glm::vec3 position = glm::vec3(0.0f);
+    // Direction (DIRECTIONAL/SPOT) — ignored for POINT
+    glm::vec3 direction = glm::vec3(0.0f, -1.0f, 0.0f);
 
-struct SpotLight
-{
-    glm::vec3 position;
-    glm::vec3 direction;
-
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-
+    // Attenuation (POINT/SPOT only)
     float constant = 1.0f;
     float linear = 0.09f;
     float quadratic = 0.032f;
 
-    float cutOff = 12.5f;      // inner cone half-angle, in degrees
-    float outerCutOff = 17.5f; // outer cone half-angle, in degrees
+    // SPOT cone half-angles in degrees (converted to cosines on upload)
+    float cutOff = 12.5f;
+    float outerCutOff = 17.5f;
 };
 
-using Light = std::variant<DirectionalLight, PointLight, SpotLight>;
-
 // -----------------------------------------------------------------------------
-// LightUtils — upload a light struct to a ShaderProgram's uniforms.
-// The shader is expected to already be active (use() called beforehand).
-// cutOff/outerCutOff are converted to cosines automatically.
+// LightUtils — upload lights to shader uniforms.
+// The shader must already be active (use() called beforehand).
 // -----------------------------------------------------------------------------
 namespace LightUtils
 {
-    void uploadToShader(ShaderProgram &shader, const DirectionalLight &light);
-
-    // index corresponds to pointLights[index] in the shader
-    void uploadToShader(ShaderProgram &shader, const PointLight &light, int index);
-
-    void uploadToShader(ShaderProgram &shader, const SpotLight &light);
+    void uploadToShader(ShaderProgram &shader, std::span<const Light> lights);
 } // namespace LightUtils

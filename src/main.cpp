@@ -125,34 +125,38 @@ Scene scene(Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f)));
 
 static void initSceneLights()
 {
-    scene.directionalLight = {
-        .direction = {-0.2f, -1.0f, -0.3f},
-        .ambient = {0.05f, 0.05f, 0.2f},
-        .diffuse = {0.25f, 0.25f, 1.0f},
-        .specular = {0.5f, 0.5f, 0.5f},
-    };
+    scene.ambientColor = glm::vec3(0.03f);
 
-    scene.pointLights = {
+    scene.lights = {
+        // Directional light (blueish, like moonlight)
         {
+            .type = LightType::DIRECTIONAL,
+            .color = {0.4f, 0.4f, 1.0f},
+            .intensity = 0.6f,
+            .direction = {-0.2f, -1.0f, -0.3f},
+        },
+        // Green-ish point light
+        {
+            .type = LightType::POINT,
+            .color = {0.25f, 1.0f, 0.25f},
+            .intensity = 1.0f,
             .position = {0.7f, 0.2f, 2.0f},
-            .ambient = {0.05f, 0.2f, 0.05f},
-            .diffuse = {0.25f, 1.0f, 0.25f},
-            .specular = {1.0f, 1.0f, 1.0f},
         },
+        // Red-ish point light
         {
+            .type = LightType::POINT,
+            .color = {1.0f, 0.25f, 0.25f},
+            .intensity = 1.0f,
             .position = {2.3f, -3.3f, -4.0f},
-            .ambient = {0.2f, 0.05f, 0.05f},
-            .diffuse = {1.0f, 0.25f, 0.25f},
-            .specular = {1.0f, 1.0f, 1.0f},
         },
-    };
-
-    scene.spotLight = {
-        .position = {0.f, 0.f, 0.f},
-        .direction = {0.f, 0.f, -1.f},
-        .ambient = {0.0f, 0.0f, 0.0f},
-        .diffuse = {1.0f, 1.0f, 1.0f},
-        .specular = {1.0f, 1.0f, 1.0f},
+        // Spotlight (flashlight, attached to camera — updated per frame)
+        {
+            .type = LightType::SPOT,
+            .color = {1.0f, 1.0f, 1.0f},
+            .intensity = 1.0f,
+            .position = {0.f, 0.f, 0.f},
+            .direction = {0.f, 0.f, -1.f},
+        },
     };
 }
 
@@ -245,10 +249,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shaderProgram.use();
-        // Update per-frame spotlight position/direction from camera, then re-upload
-        scene.spotLight.position = scene.camera.position;
-        scene.spotLight.direction = scene.camera.direction;
-        LightUtils::uploadToShader(shaderProgram, scene.spotLight);
+        // Update per-frame spotlight position/direction from camera, then re-upload all lights
+        auto &spotLight = scene.lights.back(); // last light is the flashlight
+        spotLight.position = scene.camera.position;
+        spotLight.direction = scene.camera.direction;
+        scene.uploadLights(shaderProgram);
 
         // render scene entities
         for (auto &entity : scene.entities)

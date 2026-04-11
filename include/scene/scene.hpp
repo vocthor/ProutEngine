@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "camera.hpp"
 #include "scene/entity.hpp"
 #include "scene/light.hpp"
@@ -15,9 +17,8 @@ public:
 
     std::vector<Entity> entities;
 
-    DirectionalLight directionalLight{};
-    std::vector<PointLight> pointLights;
-    SpotLight spotLight{};
+    std::vector<Light> lights;
+    glm::vec3 ambientColor = glm::vec3(0.03f);
 
     explicit Scene(Camera cam) : camera(cam) {}
 
