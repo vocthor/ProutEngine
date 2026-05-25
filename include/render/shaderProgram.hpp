@@ -1,9 +1,7 @@
 #pragma once
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <string>
+#include <unordered_map>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -42,7 +40,9 @@ public:
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
 
 private:
+    GLint uniformLocation(const std::string &name) const;
     void checkCompileErrors() const;
 
     AutoRelease<::GLuint> handle_;
+    mutable std::unordered_map<std::string, ::GLint> uniformCache_;
 };
