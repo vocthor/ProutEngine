@@ -27,12 +27,15 @@ struct Light {
 struct Material {
     sampler2D texture_diffuse0;
     sampler2D texture_specular0;
+    sampler2D texture_normal0;
     float shininess;
+    bool hasNormalMap;
 };
 
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TextureCoord;
+in mat3 TBN;
 
 uniform vec3 viewPos;
 uniform vec3 ambientColor;
@@ -88,7 +91,19 @@ vec3 CalcLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir,
 
 void main()
 {
-    vec3 norm   = normalize(Normal);
+    vec3 norm;
+    if (material.hasNormalMap)
+    {
+        // Sample normal map (tangent space) and transform to world space
+        norm = texture(material.texture_normal0, TextureCoord).rgb;
+        norm = norm * 2.0 - 1.0; // [0,1] → [-1,1]
+        norm = normalize(TBN * norm);
+    }
+    else
+    {
+        norm = normalize(Normal);
+    }
+
     vec3 viewDir = normalize(viewPos - FragPos);
 
     vec3 albedo = pow(vec3(texture(material.texture_diffuse0, TextureCoord)), vec3(2.2));

@@ -21,7 +21,7 @@ void Model::loadModel(std::string_view path)
 {
     // read file via ASSIMP
     ::Assimp::Importer importer;
-    const ::aiScene *scene = importer.ReadFile(path.data(), ::aiProcess_Triangulate | ::aiProcess_FlipUVs); // aiProcess_GenNormals | aiProcess_SplitLargeMeshes | aiProcess_OptimizeMeshes | aiProcess_CalcTangentSpace
+    const ::aiScene *scene = importer.ReadFile(path.data(), ::aiProcess_Triangulate | ::aiProcess_FlipUVs | ::aiProcess_CalcTangentSpace); // aiProcess_GenNormals | aiProcess_SplitLargeMeshes | aiProcess_OptimizeMeshes
     // check for errors
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -76,6 +76,12 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
             vector.z = mesh->mNormals[i].z;
             vertex.normal = vector;
         }
+        // tangent & bitangent
+        if (mesh->HasTangentsAndBitangents())
+        {
+            vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+        }
         // texture coordinates
         if (mesh->mTextureCoords[0])
         {
@@ -107,6 +113,9 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
     // 2. specular maps
     std::vector<TextureRef> specularMaps = loadMaterialTextures(material, ::aiTextureType_SPECULAR, "texture_specular");
     texturesRefs.insert(texturesRefs.end(), specularMaps.begin(), specularMaps.end());
+    // 3. normal maps
+    std::vector<TextureRef> normalMaps = loadMaterialTextures(material, ::aiTextureType_HEIGHT, "texture_normal");
+    texturesRefs.insert(texturesRefs.end(), normalMaps.begin(), normalMaps.end());
 
     return Mesh(vertices, indices, texturesRefs);
 }

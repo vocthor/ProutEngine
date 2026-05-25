@@ -10,10 +10,12 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
     vao_.bind();
     ebo_.bind();
     // Links VBO attributes such as coordinates and colors to VAO
-    vao_.linkAttrib(vbo_, 0, 3, GL_FLOAT, sizeof(Vertex), (void *)0);                           // Position
-    vao_.linkAttrib(vbo_, 1, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, normal));    // Normal
-    vao_.linkAttrib(vbo_, 2, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));     // Color
-    vao_.linkAttrib(vbo_, 3, 2, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, texCoords)); // Texture coords
+    vao_.linkAttrib(vbo_, 0, 3, GL_FLOAT, sizeof(Vertex), (void *)0);                             // Position
+    vao_.linkAttrib(vbo_, 1, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, normal));      // Normal
+    vao_.linkAttrib(vbo_, 2, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, color));       // Color
+    vao_.linkAttrib(vbo_, 4, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, tangent));     // Tangent
+    vao_.linkAttrib(vbo_, 5, 3, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, bitangent));   // Bitangent
+    vao_.linkAttrib(vbo_, 3, 2, GL_FLOAT, sizeof(Vertex), (void *)offsetof(Vertex, texCoords));   // Texture coords
     // Unbind all to prevent accidentally modifying them
     vao_.unbind();
     vbo_.unbind();
@@ -29,6 +31,7 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &te
     // Keep track of how many of each type of textures we have
     unsigned int numDiffuse = 0;
     unsigned int numSpecular = 0;
+    unsigned int numNormal = 0;
 
     for (unsigned int i = 0; i < texturesRefs.size(); i++)
     {
@@ -39,10 +42,13 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &te
             num = std::to_string(numDiffuse++);
         else if (type == "texture_specular")
             num = std::to_string(numSpecular++);
+        else if (type == "texture_normal")
+            num = std::to_string(numNormal++);
 
         shaderProgram.setInt(("material." + type + num).c_str(), i);
         textureManager.get(texturesRefs[i].handle).bind(i);
     }
+    shaderProgram.setBool("material.hasNormalMap", numNormal > 0);
     // Take care of the camera Matrix
     shaderProgram.setVec3("viewPos", camera.position);
     camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
