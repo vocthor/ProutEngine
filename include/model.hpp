@@ -2,7 +2,9 @@
 
 #include <assimp/scene.h>
 
+#include "camera.hpp"
 #include "render/mesh.hpp"
+#include "render/shaderProgram.hpp"
 
 class Model
 {

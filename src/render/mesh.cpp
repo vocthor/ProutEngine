@@ -22,19 +22,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Mate
     ebo_.unbind();
 }
 
-void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &textureManager)
+void Mesh::draw()
 {
-    // Bind shaderProgram to be able to access uniforms
-    shaderProgram.use();
     vao_.bind();
-
-    material.bind(shaderProgram, textureManager);
-
-    // Take care of the camera Matrix
-    shaderProgram.setVec3("viewPos", camera.position);
-    camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
-
-    // Draw the actual mesh
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     vao_.unbind();
 }

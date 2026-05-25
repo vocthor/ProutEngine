@@ -15,8 +15,17 @@ Model::Model(std::string_view path, TextureManager &textureManager)
 
 void Model::draw(ShaderProgram &shaderProgram, Camera &camera)
 {
-    for (unsigned int i = 0; i < meshes_.size(); i++)
-        meshes_[i].draw(shaderProgram, camera, textureManager_);
+    // Bind shaderProgram to be able to access uniforms
+    shaderProgram.use();
+    // Take care of the camera Matrix
+    shaderProgram.setVec3("viewPos", camera.position);
+    camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);
+
+    for (auto &mesh : meshes_)
+    {
+        mesh.material.bind(shaderProgram, textureManager_);
+        mesh.draw();
+    }
 }
 
 void Model::loadModel(std::string_view path)
