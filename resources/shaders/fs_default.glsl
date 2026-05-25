@@ -1,8 +1,8 @@
 #version 410 core
 
 // ---------------------------------------------------------------------------
-// Unified light model — color × intensity, Blinn-Phong shading.
-// Prepares the transition to PBR Cook-Torrance (Phase 6.11).
+// PBR Cook-Torrance BRDF — GGX distribution, Smith geometry, Fresnel-Schlick.
+// Uses unified lights[] array from step 4.2.
 // ---------------------------------------------------------------------------
 
 #define MAX_LIGHTS 16
@@ -10,6 +10,8 @@
 const int LIGHT_DIRECTIONAL = 0;
 const int LIGHT_POINT       = 1;
 const int LIGHT_SPOT        = 2;
+
+const float PI = 3.14159265359;
 
 struct Light {
     int   type;
@@ -20,16 +22,27 @@ struct Light {
     float constant;
     float linear;
     float quadratic;
-    float cutOff;       // cosine of inner cone angle
-    float outerCutOff;  // cosine of outer cone angle
+    float cutOff;
+    float outerCutOff;
 };
 
 struct Material {
-    sampler2D texture_diffuse0;
-    sampler2D texture_specular0;
-    sampler2D texture_normal0;
-    float shininess;
+    sampler2D albedoMap;
+    sampler2D normalMap;
+    sampler2D metallicMap;
+    sampler2D roughnessMap;
+    sampler2D aoMap;
+
+    bool hasAlbedoMap;
     bool hasNormalMap;
+    bool hasMetallicMap;
+    bool hasRoughnessMap;
+    bool hasAoMap;
+
+    vec3  albedo;
+    float metallic;
+    float roughness;
+    float ao;
 };
 
 in vec3 FragPos;
@@ -46,80 +59,145 @@ uniform int  numLights;
 out vec4 FragColor;
 
 // ---------------------------------------------------------------------------
-// Single light contribution (Blinn-Phong).
-// albedo = diffuse texture sample, spec = specular texture sample.
+// PBR functions
 // ---------------------------------------------------------------------------
-vec3 CalcLight(Light light, vec3 normal, vec3 fragPos, vec3 viewDir,
-               vec3 albedo, vec3 spec)
+
+// Normal Distribution Function — GGX/Trowbridge-Reitz
+float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
-    vec3  lightDir;
-    float attenuation    = 1.0;
-    float spotIntensity  = 1.0;
+    float a  = roughness * roughness;
+    float a2 = a * a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+
+    float denom = NdotH2 * (a2 - 1.0) + 1.0;
+    denom = PI * denom * denom;
+
+    return a2 / max(denom, 0.0001);
+}
+
+// Geometry function — Schlick-GGX (single direction)
+float GeometrySchlickGGX(float NdotV, float roughness)
+{
+    float r = roughness + 1.0;
+    float k = (r * r) / 8.0;
+    return NdotV / (NdotV * (1.0 - k) + k);
+}
+
+// Geometry function — Smith (both directions)
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    return GeometrySchlickGGX(NdotV, roughness) * GeometrySchlickGGX(NdotL, roughness);
+}
+
+// Fresnel — Schlick approximation
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+// ---------------------------------------------------------------------------
+// Per-light radiance computation
+// ---------------------------------------------------------------------------
+vec3 CalcLight(Light light, vec3 N, vec3 V, vec3 fragPos,
+               vec3 albedo, float metallic, float roughness, vec3 F0)
+{
+    vec3  L;
+    float attenuation   = 1.0;
+    float spotIntensity = 1.0;
 
     if (light.type == LIGHT_DIRECTIONAL)
     {
-        lightDir = normalize(-light.direction);
+        L = normalize(-light.direction);
     }
     else
     {
-        lightDir = normalize(light.position - fragPos);
+        L = normalize(light.position - fragPos);
         float dist = length(light.position - fragPos);
         attenuation = 1.0 / (light.constant + light.linear * dist
                              + light.quadratic * dist * dist);
 
         if (light.type == LIGHT_SPOT)
         {
-            float theta   = dot(lightDir, normalize(-light.direction));
+            float theta   = dot(L, normalize(-light.direction));
             float epsilon = light.cutOff - light.outerCutOff;
             spotIntensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
         }
     }
 
-    // Blinn-Phong (half-vector based — closer to PBR specular lobe)
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3  halfDir = normalize(lightDir + viewDir);
-    float specFactor = pow(max(dot(normal, halfDir), 0.0), material.shininess);
-
-    // Radiance from this light (color × intensity × falloff)
+    vec3 H = normalize(V + L);
     vec3 radiance = light.color * light.intensity * attenuation * spotIntensity;
 
-    vec3 diffuse  = diff * albedo * radiance;
-    vec3 specular = specFactor * spec * radiance;
+    // Cook-Torrance BRDF
+    float NDF = DistributionGGX(N, H, roughness);
+    float G   = GeometrySmith(N, V, L, roughness);
+    vec3  F   = FresnelSchlick(max(dot(H, V), 0.0), F0);
 
-    return diffuse + specular;
+    vec3  numerator   = NDF * G * F;
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
+    vec3  specular    = numerator / denominator;
+
+    // Energy conservation
+    vec3 kS = F;
+    vec3 kD = (1.0 - kS) * (1.0 - metallic);
+
+    float NdotL = max(dot(N, L), 0.0);
+    return (kD * albedo / PI + specular) * radiance * NdotL;
 }
 
+// ---------------------------------------------------------------------------
 void main()
 {
-    vec3 norm;
+    // Sample material properties
+    vec3 albedo = material.hasAlbedoMap
+        ? pow(texture(material.albedoMap, TextureCoord).rgb, vec3(2.2))
+        : material.albedo;
+
+    float metallic = material.hasMetallicMap
+        ? texture(material.metallicMap, TextureCoord).r
+        : material.metallic;
+
+    float roughness = material.hasRoughnessMap
+        ? texture(material.roughnessMap, TextureCoord).r
+        : material.roughness;
+
+    float ao = material.hasAoMap
+        ? texture(material.aoMap, TextureCoord).r
+        : material.ao;
+
+    // Normal
+    vec3 N;
     if (material.hasNormalMap)
     {
-        // Sample normal map (tangent space) and transform to world space
-        norm = texture(material.texture_normal0, TextureCoord).rgb;
-        norm = norm * 2.0 - 1.0; // [0,1] → [-1,1]
-        norm = normalize(TBN * norm);
+        N = texture(material.normalMap, TextureCoord).rgb;
+        N = N * 2.0 - 1.0;
+        N = normalize(TBN * N);
     }
     else
     {
-        norm = normalize(Normal);
+        N = normalize(Normal);
     }
 
-    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 V = normalize(viewPos - FragPos);
 
-    vec3 albedo = pow(vec3(texture(material.texture_diffuse0, TextureCoord)), vec3(2.2));
-    vec3 spec   = pow(vec3(texture(material.texture_specular0, TextureCoord)), vec3(2.2));
+    // F0 — base reflectivity (dielectric ≈ 0.04, metallic = albedo)
+    vec3 F0 = mix(vec3(0.04), albedo, metallic);
 
-    // Global ambient
-    vec3 result = ambientColor * albedo;
-
-    // Accumulate all lights
+    // Accumulate lighting
+    vec3 Lo = vec3(0.0);
     for (int i = 0; i < numLights; i++)
-        result += CalcLight(lights[i], norm, FragPos, viewDir, albedo, spec);
+        Lo += CalcLight(lights[i], N, V, FragPos, albedo, metallic, roughness, F0);
+
+    // Ambient (simple constant, IBL would go here later)
+    vec3 ambient = ambientColor * albedo * ao;
+    vec3 color = ambient + Lo;
 
     // Reinhard tone mapping
-    result = result / (result + vec3(1.0));
+    color = color / (color + vec3(1.0));
     // Gamma correction (linear → sRGB)
-    result = pow(result, vec3(1.0 / 2.2));
+    color = pow(color, vec3(1.0 / 2.2));
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4(color, 1.0);
 }

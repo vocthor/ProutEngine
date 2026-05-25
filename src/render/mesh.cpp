@@ -1,9 +1,9 @@
 #include "render/mesh.hpp"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureRef> texturesRefs)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material)
     : vertices{std::move(vertices)},
       indices{std::move(indices)},
-      texturesRefs{std::move(texturesRefs)},
+      material{std::move(material)},
       vbo_{this->vertices}, // ! Mind the move() on the parameter before
       ebo_{this->indices}   // ! Mind the move() on the parameter before
 {
@@ -28,27 +28,8 @@ void Mesh::draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &te
     shaderProgram.use();
     vao_.bind();
 
-    // Keep track of how many of each type of textures we have
-    unsigned int numDiffuse = 0;
-    unsigned int numSpecular = 0;
-    unsigned int numNormal = 0;
+    material.bind(shaderProgram, textureManager);
 
-    for (unsigned int i = 0; i < texturesRefs.size(); i++)
-    {
-        std::string num;
-        const std::string &type = texturesRefs[i].type;
-
-        if (type == "texture_diffuse")
-            num = std::to_string(numDiffuse++);
-        else if (type == "texture_specular")
-            num = std::to_string(numSpecular++);
-        else if (type == "texture_normal")
-            num = std::to_string(numNormal++);
-
-        shaderProgram.setInt(("material." + type + num).c_str(), i);
-        textureManager.get(texturesRefs[i].handle).bind(i);
-    }
-    shaderProgram.setBool("material.hasNormalMap", numNormal > 0);
     // Take care of the camera Matrix
     shaderProgram.setVec3("viewPos", camera.position);
     camera.matrix(50.0f, 0.1f, 100.0f, shaderProgram);

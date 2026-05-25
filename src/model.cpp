@@ -1,5 +1,7 @@
 #include "model.hpp"
 
+#include <fstream>
+
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
@@ -56,7 +58,7 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
     Log::debug("Processing mesh {}", mesh->mName.C_Str());
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
-    std::vector<TextureRef> texturesRefs;
+    Material material;
 
     /***** Vertices *****/
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -106,32 +108,47 @@ Mesh Model::processMesh(::aiMesh *mesh, const ::aiScene *scene)
     }
 
     /***** Material *****/
-    ::aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-    // 1. diffuse maps
-    std::vector<TextureRef> diffuseMaps = loadMaterialTextures(material, ::aiTextureType_DIFFUSE, "texture_diffuse");
-    texturesRefs.insert(texturesRefs.end(), diffuseMaps.begin(), diffuseMaps.end());
-    // 2. specular maps
-    std::vector<TextureRef> specularMaps = loadMaterialTextures(material, ::aiTextureType_SPECULAR, "texture_specular");
-    texturesRefs.insert(texturesRefs.end(), specularMaps.begin(), specularMaps.end());
-    // 3. normal maps
-    std::vector<TextureRef> normalMaps = loadMaterialTextures(material, ::aiTextureType_HEIGHT, "texture_normal");
-    texturesRefs.insert(texturesRefs.end(), normalMaps.begin(), normalMaps.end());
+    ::aiMaterial *aiMat = scene->mMaterials[mesh->mMaterialIndex];
 
-    return Mesh(vertices, indices, texturesRefs);
+    // Albedo (diffuse)
+    material.albedoMap = loadTexture(aiMat, ::aiTextureType_DIFFUSE);
+    // Normal map (Assimp maps bump to HEIGHT for OBJ)
+    material.normalMap = loadTexture(aiMat, ::aiTextureType_HEIGHT);
+    if (material.normalMap == TextureHandle::Invalid)
+        material.normalMap = loadTexture(aiMat, ::aiTextureType_NORMALS);
+    // Metallic (specular map as approximation)
+    material.metallicMap = loadTexture(aiMat, ::aiTextureType_SPECULAR);
+    // Roughness
+    material.roughnessMap = loadTexture(aiMat, ::aiTextureType_DIFFUSE_ROUGHNESS);
+    if (material.roughnessMap == TextureHandle::Invalid)
+        material.roughnessMap = tryLoadFile("roughness.jpg");
+    // AO
+    material.aoMap = loadTexture(aiMat, ::aiTextureType_AMBIENT_OCCLUSION);
+    if (material.aoMap == TextureHandle::Invalid)
+        material.aoMap = loadTexture(aiMat, ::aiTextureType_LIGHTMAP);
+    if (material.aoMap == TextureHandle::Invalid)
+        material.aoMap = tryLoadFile("ao.jpg");
+
+    return Mesh(vertices, indices, material);
 }
 
-std::vector<TextureRef> Model::loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName)
+TextureHandle Model::loadTexture(::aiMaterial *mat, ::aiTextureType type)
 {
-    std::vector<TextureRef> texturesRefs;
-    for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-    {
-        ::aiString str;
-        mat->GetTexture(type, i, &str);
-        std::string _path = directory_ + "/" + str.C_Str();
-        Log::debug("Loading texture {} on {}{}", _path, typeName, i);
-        TextureHandle handle = textureManager_.load(_path);
-        texturesRefs.push_back({.handle = handle,
-                                .type = typeName});
-    }
-    return texturesRefs;
+    if (mat->GetTextureCount(type) == 0)
+        return TextureHandle::Invalid;
+    ::aiString str;
+    mat->GetTexture(type, 0, &str);
+    std::string path = directory_ + "/" + str.C_Str();
+    Log::debug("Loading texture: {}", path);
+    return textureManager_.load(path);
+}
+
+TextureHandle Model::tryLoadFile(const std::string &filename)
+{
+    std::string path = directory_ + "/" + filename;
+    std::ifstream f(path);
+    if (!f.good())
+        return TextureHandle::Invalid;
+    Log::debug("Loading texture (heuristic): {}", path);
+    return textureManager_.load(path);
 }

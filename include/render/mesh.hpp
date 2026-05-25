@@ -2,17 +2,17 @@
 
 #include "render/VAO.hpp"
 #include "render/gpuBuffer.hpp"
+#include "render/material.hpp"
 #include "camera.hpp"
-#include "textureManager.hpp"
 
 class Mesh
 {
 public:
     std::vector<Vertex> vertices;
     std::vector<::GLuint> indices;
-    std::vector<TextureRef> texturesRefs;
+    Material material;
 
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<TextureRef> texturesRefs);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material);
     void draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &textureManager);
 
 private:

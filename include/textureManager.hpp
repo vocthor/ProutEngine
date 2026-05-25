@@ -12,13 +12,6 @@ enum class TextureHandle : std::uint32_t
     Invalid = UINT32_MAX
 };
 
-// Used in other classes to reference a Texture and its role in the material (diffuse, specular, etc.)
-struct TextureRef
-{
-    TextureHandle handle;
-    std::string type; // rôle : "texture_diffuse", "texture_specular", etc.
-};
-
 class TextureManager
 {
 public:

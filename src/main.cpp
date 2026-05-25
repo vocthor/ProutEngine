@@ -13,6 +13,7 @@
 #include "core/window.hpp"
 #include "input/inputManager.hpp"
 #include "render/mesh.hpp"
+#include "render/material.hpp"
 #include "scene/scene.hpp"
 #include "utils/log.hpp"
 #include "model.hpp"
@@ -176,9 +177,10 @@ int main()
     TextureManager textureManager;
     Model ourModel("resources/models/backpack/backpack.obj", textureManager);
 
-    Entity backpack;
-    backpack.name = "Backpack";
-    backpack.model = &ourModel;
+    Entity backpack{
+        .name = "Backpack",
+        .model = &ourModel
+    };
     scene.entities.push_back(std::move(backpack));
 
     // build and compile our shader program
@@ -188,11 +190,13 @@ int main()
     ShaderProgram shaderProgram(vertexShader, fragmentShader);
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
-    std::vector<TextureRef> tex{
-        {textureManager.load("resources/textures/container2.png"), "texture_diffuse"},
-        {textureManager.load("resources/textures/container2_specular.png"), "texture_specular"},
+    Material cubeMat 
+    {
+        .albedoMap = textureManager.load("resources/textures/container2.png"),
+        .metallicMap = textureManager.load("resources/textures/container2_specular.png"),
+        .roughness = 0.4f
     };
-    Mesh cube(verts, ind, tex);
+    Mesh cube(verts, ind, cubeMat);
     Log::info("Shader program default created.");
 
     // light shader
@@ -202,7 +206,7 @@ int main()
     ShaderProgram lightShader(vertexLightShader, fragmentLightShader);
     std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
     std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-    Mesh light(lightVerts, lightInd, {});
+    Mesh light(lightVerts, lightInd, Material{});
     Log::info("Shader program light created.");
 
     // light cube parametrization
@@ -212,7 +216,6 @@ int main()
     // shaders setup
     // -------------
     shaderProgram.use();
-    shaderProgram.setFloat("material.shininess", 32.0f);
     initSceneLights();
     scene.uploadLights(shaderProgram);
     Log::info("Shader program default setup.");

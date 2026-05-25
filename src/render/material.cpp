@@ -2,58 +2,29 @@
 
 #include <glad/glad.h>
 
-Material::Material(std::shared_ptr<ShaderProgram> shader)
-    : shader_{std::move(shader)}
-{
-}
+#include "render/shaderProgram.hpp"
 
-void Material::setTexture(std::string_view slot, std::shared_ptr<Texture> texture)
+void Material::bind(ShaderProgram &shader, TextureManager &texMgr) const
 {
-    textures_[std::string(slot)] = std::move(texture);
-}
-
-void Material::bind() const
-{
-    shader_->use();
-
-    int unit = 0;
-    for (const auto &[slot, texture] : textures_)
+    auto bindSlot = [&](int unit, const char *sampler, const char *hasFlag, TextureHandle h)
     {
-        texture->bind(unit);
-        shader_->setInt(slot, unit);
-        ++unit;
-    }
+        bool has = (h != TextureHandle::Invalid);
+        shader.setBool(hasFlag, has);
+        if (has)
+        {
+            texMgr.get(h).bind(unit);
+            shader.setInt(sampler, unit);
+        }
+    };
 
-    for (const auto &[name, value] : properties_)
-    {
-        std::visit([&](const auto &v)
-                   {
-            using T = std::decay_t<decltype(v)>;
-            if constexpr (std::is_same_v<T, float>)
-                shader_->setFloat(name, v);
-            else if constexpr (std::is_same_v<T, int>)
-                shader_->setInt(name, v);
-            else if constexpr (std::is_same_v<T, glm::vec3>)
-                shader_->setVec3(name, v);
-            else if constexpr (std::is_same_v<T, glm::vec4>)
-                shader_->setVec4(name, v);
-            else if constexpr (std::is_same_v<T, glm::mat4>)
-                shader_->setMat4(name, v); }, value);
-    }
-}
+    bindSlot(0, "material.albedoMap", "material.hasAlbedoMap", albedoMap);
+    bindSlot(1, "material.normalMap", "material.hasNormalMap", normalMap);
+    bindSlot(2, "material.metallicMap", "material.hasMetallicMap", metallicMap);
+    bindSlot(3, "material.roughnessMap", "material.hasRoughnessMap", roughnessMap);
+    bindSlot(4, "material.aoMap", "material.hasAoMap", aoMap);
 
-void Material::unbind() const
-{
-    int unit = 0;
-    for (const auto &[slot, texture] : textures_)
-    {
-        ::glActiveTexture(GL_TEXTURE0 + unit);
-        texture->unbind();
-        ++unit;
-    }
-}
-
-ShaderProgram &Material::shader() const
-{
-    return *shader_;
+    shader.setVec3("material.albedo", albedo);
+    shader.setFloat("material.metallic", metallic);
+    shader.setFloat("material.roughness", roughness);
+    shader.setFloat("material.ao", ao);
 }

@@ -18,5 +18,6 @@ private:
     void loadModel(std::string_view path);
     void processNode(::aiNode *node, const ::aiScene *scene);
     Mesh processMesh(::aiMesh *mesh, const ::aiScene *scene);
-    std::vector<TextureRef> loadMaterialTextures(::aiMaterial *mat, ::aiTextureType type, std::string typeName);
+    TextureHandle loadTexture(::aiMaterial *mat, ::aiTextureType type);
+    TextureHandle tryLoadFile(const std::string &filename);
 };
