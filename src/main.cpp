@@ -12,11 +12,10 @@
 #include "core/timer.hpp"
 #include "core/window.hpp"
 #include "input/inputManager.hpp"
-#include "render/mesh.hpp"
 #include "render/material.hpp"
 #include "scene/scene.hpp"
 #include "utils/log.hpp"
-#include "model.hpp"
+#include "modelBuilder.hpp"
 #include "cameraController.hpp"
 #include "textureManager.hpp"
 
@@ -175,7 +174,7 @@ int main()
     // load models
     // -----------
     TextureManager textureManager;
-    Model ourModel("resources/models/backpack/backpack.obj", textureManager);
+    Model ourModel = ModelBuilder::load("resources/models/backpack/backpack.obj", textureManager).build();
 
     Entity backpack{
         .name = "Backpack",
@@ -190,13 +189,13 @@ int main()
     ShaderProgram shaderProgram(vertexShader, fragmentShader);
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
-    Material cubeMat 
+    Material cubeMat
     {
         .albedoMap = textureManager.load("resources/textures/container2.png"),
         .metallicMap = textureManager.load("resources/textures/container2_specular.png"),
         .roughness = 0.4f
     };
-    Mesh cube(verts, ind, cubeMat);
+    Model cubeModel = ModelBuilder::procedural().addPart(std::move(verts), std::move(ind), std::move(cubeMat)).build();
     Log::info("Shader program default created.");
 
     // light shader
@@ -206,7 +205,7 @@ int main()
     ShaderProgram lightShader(vertexLightShader, fragmentLightShader);
     std::vector<Vertex> lightVerts(lightVertices, lightVertices + sizeof(lightVertices) / sizeof(Vertex));
     std::vector<GLuint> lightInd(lightIndices, lightIndices + sizeof(lightIndices) / sizeof(GLuint));
-    Mesh light(lightVerts, lightInd, Material{});
+    Model lightModel = ModelBuilder::procedural().addPart(std::move(lightVerts), std::move(lightInd), Material{}).build();
     Log::info("Shader program light created.");
 
     // light cube parametrization
@@ -267,7 +266,7 @@ int main()
             const glm::mat3 normal = entity.transform.getNormalMatrix();
             shaderProgram.setMat4("model", model);
             shaderProgram.setMat3("normal", normal);
-            entity.model->draw(shaderProgram, scene.camera);
+            entity.model->draw(shaderProgram, scene.camera, textureManager);
         }
 
         // // Affichage du cube à toutes les cubePositions

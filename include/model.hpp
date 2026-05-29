@@ -1,25 +1,29 @@
 #pragma once
 
-#include <assimp/scene.h>
+#include <vector>
 
 #include "camera.hpp"
 #include "render/mesh.hpp"
+#include "render/material.hpp"
 #include "render/shaderProgram.hpp"
+
+// One rendered unit: pure geometry paired with its appearance.
+struct ModelPart
+{
+    Mesh     mesh;
+    Material material;
+};
 
 class Model
 {
 public:
-    Model(std::string_view path, TextureManager &textureManager);
-    void draw(ShaderProgram &shaderProgram, Camera &camera);
+    void draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &textureManager);
+
+    const std::vector<ModelPart> &parts() const { return parts_; }
 
 private:
-    std::vector<Mesh> meshes_;
-    std::string directory_;
-    TextureManager &textureManager_;
+    explicit Model(std::vector<ModelPart> parts);
+    friend class ModelBuilder;
 
-    void loadModel(std::string_view path);
-    void processNode(::aiNode *node, const ::aiScene *scene);
-    Mesh processMesh(::aiMesh *mesh, const ::aiScene *scene);
-    TextureHandle loadTexture(::aiMaterial *mat, ::aiTextureType type);
-    TextureHandle tryLoadFile(const std::string &filename);
+    std::vector<ModelPart> parts_;
 };

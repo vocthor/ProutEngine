@@ -1,9 +1,8 @@
 #include "render/mesh.hpp"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices)
     : vertices{std::move(vertices)},
       indices{std::move(indices)},
-      material{std::move(material)},
       vbo_{this->vertices}, // ! Mind the move() on the parameter before
       ebo_{this->indices}   // ! Mind the move() on the parameter before
 {
