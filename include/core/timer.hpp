@@ -7,7 +7,7 @@ class Timer
 public:
     void update()
     {
-        float now = static_cast<float>(glfwGetTime());
+        float now = static_cast<float>(::glfwGetTime());
         deltaTime_ = now - lastFrame_;
         lastFrame_ = now;
     }

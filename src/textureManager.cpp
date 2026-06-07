@@ -4,6 +4,7 @@
 
 TextureHandle TextureManager::load(const std::string &path, ::GLenum pixelType)
 {
+    // If already loaded, return the existing handle from cache
     auto it = cache_.find(path);
     if (it != cache_.end())
         return it->second;

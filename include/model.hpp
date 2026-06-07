@@ -10,7 +10,7 @@
 // One rendered unit: pure geometry paired with its appearance.
 struct ModelPart
 {
-    Mesh     mesh;
+    Mesh mesh;
     Material material;
 };
 

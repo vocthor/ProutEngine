@@ -166,10 +166,10 @@ int main()
 
     // configure global opengl state
     // -----------------------------
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
-    glEnable(GL_STENCIL_TEST);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
+    ::glEnable(GL_DEPTH_TEST);
+    ::glDepthFunc(GL_LESS); // always pass the depth test (same effect as ::glDisable(GL_DEPTH_TEST))
+    ::glEnable(GL_STENCIL_TEST);
+    // ::glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // wireframe mode
 
     // load models
     // -----------
@@ -178,8 +178,7 @@ int main()
 
     Entity backpack{
         .name = "Backpack",
-        .model = &ourModel
-    };
+        .model = &ourModel};
     scene.entities.push_back(std::move(backpack));
 
     // build and compile our shader program
@@ -189,12 +188,10 @@ int main()
     ShaderProgram shaderProgram(vertexShader, fragmentShader);
     std::vector<Vertex> verts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
     std::vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
-    Material cubeMat
-    {
+    Material cubeMat{
         .albedoMap = textureManager.load("resources/textures/container2.png"),
         .metallicMap = textureManager.load("resources/textures/container2_specular.png"),
-        .roughness = 0.4f
-    };
+        .roughness = 0.4f};
     Model cubeModel = ModelBuilder::procedural().addPart(std::move(verts), std::move(ind), std::move(cubeMat)).build();
     Log::info("Shader program default created.");
 
@@ -232,7 +229,7 @@ int main()
                        .key(GLFW_KEY_ESCAPE)
                        .pressed
                        .connect([&]
-                                { glfwSetWindowShouldClose(window.handle(), true); });
+                                { ::glfwSetWindowShouldClose(window.handle(), true); });
 
     // render loop
     // -----------
@@ -247,8 +244,8 @@ int main()
 
         // render
         // ------
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        ::glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shaderProgram.use();
         // Update per-frame spotlight position/direction from camera, then re-upload all lights
@@ -278,7 +275,7 @@ int main()
 
         //     // Rotation de chaque cube à un angle différent
         //     float angle = 20.0f * i;
-        //     localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+        //     localCubeModel = glm::rotate(localCubeModel, glm::radians(angle) + (float)::glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
 
         //     glm::mat3 localCubeNormal = glm::transpose(glm::inverse(localCubeModel));
 
