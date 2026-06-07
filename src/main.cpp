@@ -125,7 +125,7 @@ Scene scene(Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 2.0f)));
 
 static void initSceneLights()
 {
-    scene.ambientColor = glm::vec3(0.03f);
+    scene.ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
 
     scene.lights = {
         // Directional light (blueish, like moonlight)
@@ -233,6 +233,7 @@ int main()
 
     // render loop
     // -----------
+    Log::info("Starting main loop.");
     while (!window.shouldClose())
     {
         timer.update();

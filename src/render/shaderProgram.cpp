@@ -38,11 +38,15 @@ ShaderProgram::ShaderProgram(const Shader &vertexShader, const Shader &fragmentS
 
 void ShaderProgram::use()
 {
+    // assert(("ShaderProgram is already bound", !bound_));
     ::glUseProgram(handle_);
+    bound_ = true;
 }
 
+// ! TODO : ca risque pas de péter si on bind un autre shader entre temps ?
 ::GLint ShaderProgram::uniformLocation(const std::string &name) const
 {
+    assert(("ShaderProgram must be bound before setting uniforms", bound_));
     auto it = uniformCache_.find(name);
     if (it != uniformCache_.end())
         return it->second;

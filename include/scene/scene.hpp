@@ -18,7 +18,7 @@ public:
     std::vector<Entity> entities;
 
     std::vector<Light> lights;
-    glm::vec3 ambientColor = glm::vec3(0.03f);
+    glm::vec4 ambientColor{0.1f, 0.1f, 0.1f, 1.0f};
 
     explicit Scene(Camera cam) : camera(cam) {}
 

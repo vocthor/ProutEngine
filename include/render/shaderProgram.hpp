@@ -44,5 +44,7 @@ private:
     void checkCompileErrors() const;
 
     AutoRelease<::GLuint> handle_;
+    bool bound_ = false;
+
     mutable std::unordered_map<std::string, ::GLint> uniformCache_;
 };

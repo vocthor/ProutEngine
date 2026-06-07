@@ -19,7 +19,7 @@ class Model
 public:
     void draw(ShaderProgram &shaderProgram, Camera &camera, TextureManager &textureManager);
 
-    const std::vector<ModelPart> &parts() const { return parts_; }
+    std::vector<ModelPart> &parts() { return parts_; }
 
 private:
     explicit Model(std::vector<ModelPart> parts);
