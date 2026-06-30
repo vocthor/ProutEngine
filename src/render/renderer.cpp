@@ -60,8 +60,8 @@ void Renderer::flush()
                          return a.material < b.material;
                      });
 
-    ShaderProgram *activeShader = nullptr;
-    const Material *activeMaterial = nullptr;
+    ShaderProgram *activeShader   = nullptr;
+    Material      *activeMaterial = nullptr;
 
     for (const RenderCommand &cmd : renderQueue_)
     {

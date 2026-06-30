@@ -1,16 +1,9 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-
 class Timer
 {
 public:
-    void update()
-    {
-        float now = static_cast<float>(::glfwGetTime());
-        deltaTime_ = now - lastFrame_;
-        lastFrame_ = now;
-    }
+    void update();
 
     float deltaTime() const { return deltaTime_; }
     float elapsed() const { return lastFrame_; }
