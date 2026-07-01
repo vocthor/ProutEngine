@@ -11,6 +11,10 @@ public:
     // Load all parts from a 3D asset file (OBJ, FBX, …) via Assimp.
     static ModelBuilder load(std::string_view path, TextureManager &textureManager);
 
+    // Build a unit cube (1×1×1 centered at origin) with pre-computed normals,
+    // tangents, bitangents and UV coords.  All six faces share the same material.
+    static ModelBuilder cube(Material material);
+
     // Start an empty builder for procedural geometry.
     static ModelBuilder procedural();
 

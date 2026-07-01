@@ -28,13 +28,14 @@ Ce document décrit les phases d'implémentation pour migrer l'architecture actu
 
 **Objectif** : Extraire la boucle principale de `main.cpp`.
 
-| Statut | #   | Tâche                                        | Détail                                                                                                              |
-| ------ | --- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| ✅     | 1.1 | Créer `Log` (`utility/log.hpp`)              | Fonctions `Log::info`, `Log::error`, etc. avec `std::format`. Remplacer tous les `std::cout`/`std::cerr` du projet. |
-| ✅     | 1.2 | Créer `Window` (`core/window.hpp`)           | Wrapper RAII de `GLFWwindow*`. Constructeur = `glfwCreateWindow`. Destructeur = `glfwDestroyWindow`.                |
-| ✅     | 1.3 | Créer `Timer` (`core/timer.hpp`)             | Struct simple : `update()`, `deltaTime()`. Remplace les variables globales `deltaTime`/`lastFrame`.                 |
-| ✅     | 1.4 | Créer `Application` (`core/application.hpp`) | Contient `Window`, `Timer`. Méthode `run()` = boucle principale extraite de `main()`.                               |
-| ✅     | 1.5 | Réduire `main.cpp`                           | `main()` ne fait plus que `Application app; app.run();`                                                             |
+| Statut | #   | Tâche                                        | Détail                                                                                                                                                      |
+| ------ | --- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ✅     | 1.1 | Créer `Log` (`utility/log.hpp`)              | Fonctions `Log::info`, `Log::error`, etc. avec `std::format`. Remplacer tous les `std::cout`/`std::cerr` du projet.                                         |
+| ✅     | 1.2 | Créer `Window` (`core/window.hpp`)           | Wrapper RAII de `GLFWwindow*`. Constructeur = `glfwCreateWindow`. Destructeur = `glfwDestroyWindow`.                                                        |
+| ✅     | 1.3 | Créer `Timer` (`core/timer.hpp`)             | Struct simple : `update()`, `deltaTime()`. Remplace les variables globales `deltaTime`/`lastFrame`.                                                         |
+| ✅     | 1.4 | Créer `Application` (`core/application.hpp`) | Contient `Window`, `Timer`. Méthode `run()` = boucle principale extraite de `main()`.                                                                       |
+| ✅     | 1.5 | Réduire `main.cpp`                           | `main()` ne fait plus que `Application app; app.run();`                                                                                                     |
+| 🚧     | 1.6 | Formes basiques                              | Remettre en place un système pour avoir des cubes facilement (cf main avant commit 7f8327454153e126a58742ccaf19f1d39dbbe904) -> factory ? simple fonction ? |
 
 **Vérification** : Le rendu est identique. `main.cpp` < 10 lignes.
 

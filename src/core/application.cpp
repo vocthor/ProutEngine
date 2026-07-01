@@ -34,12 +34,41 @@ void Application::run()
     Model backpackModel =
         ModelBuilder::load("resources/models/backpack/backpack.obj", textureManager).build();
 
+    // Cube — single shared geometry; all instances point to the same Model
+    Material cubeMat{
+        .albedoMap = textureManager.load("resources/textures/container2.png"),
+        .metallicMap = textureManager.load("resources/textures/container2_specular.png"),
+        .roughness = 0.4f,
+    };
+    Model cubeModel = ModelBuilder::cube(std::move(cubeMat)).build();
+
     // --- Scene --------------------------------------------------------------
     Scene scene(Camera(static_cast<int>(window_.width()),
                        static_cast<int>(window_.height()),
                        glm::vec3(0.0f, 0.0f, 2.0f)));
 
     scene.entities.push_back(Entity{.name = "Backpack", .model = &backpackModel});
+
+    // 10 cubes at the positions from the original tutorial
+    constexpr glm::vec3 cubePositions[] = {
+        {0.0f, 0.0f, 0.0f},
+        {2.0f, 5.0f, -15.0f},
+        {-1.5f, -2.2f, -2.5f},
+        {-3.8f, -2.0f, -12.3f},
+        {2.4f, -0.4f, -3.5f},
+        {-1.7f, 3.0f, -7.5f},
+        {1.3f, -2.0f, -2.5f},
+        {1.5f, 2.0f, -2.5f},
+        {1.5f, 0.2f, -1.5f},
+        {-1.3f, 1.0f, -1.5f},
+    };
+    for (int i = 0; i < 10; ++i)
+    {
+        Entity cube{.name = "Cube_" + std::to_string(i), .model = &cubeModel};
+        cube.transform.position = cubePositions[i];
+        cube.transform.rotation = glm::vec3(20.0f * static_cast<float>(i), 0.0f, 0.0f);
+        scene.entities.push_back(std::move(cube));
+    }
 
     scene.ambientColor = glm::vec4(0.1f, 0.1f, 0.1f, 1.0f);
     scene.lights = {
