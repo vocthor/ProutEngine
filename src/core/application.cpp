@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "cameraController.hpp"
+#include "debug/imguiLayer.hpp"
 #include "input/inputManager.hpp"
 #include "modelBuilder.hpp"
 #include "render/material.hpp"
@@ -28,6 +29,8 @@ Application::Application()
 // ---------------------------------------------------------------------------
 void Application::run()
 {
+    ImGuiLayer imguiLayer(window_.handle());
+
     // --- Resources ----------------------------------------------------------
     TextureManager textureManager;
 
@@ -117,18 +120,32 @@ void Application::run()
     {
         timer_.update();
         inputManager.update();
-        cameraController.update(timer_.deltaTime());
+
+        imguiLayer.beginFrame();
+
+        if (!imguiLayer.wantsMouseCapture() && !imguiLayer.wantsKeyboardCapture())
+        {
+            cameraController.update(timer_.deltaTime());
+        }
+        else
+        {
+            inputManager.setCursorMode(GLFW_CURSOR_NORMAL);
+        }
 
         // Keep the flashlight attached to the camera
         auto &flashlight = scene.lights.back();
         flashlight.position = scene.camera.position;
         flashlight.direction = scene.camera.direction;
 
+        imguiLayer.renderDebugPanel(scene);
+
         // Render
         renderer.beginFrame();
         for (auto &entity : scene.entities)
             renderer.submit(entity, shaderProgram);
         renderer.endFrame();
+
+        imguiLayer.endFrame();
 
         window_.swapBuffers();
         Window::pollEvents();

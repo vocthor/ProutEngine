@@ -49,6 +49,8 @@ private:
     static void keyCallback(GLFWwindow *, int key, int scancode, int action, int mods);
     static void mouseCallback(GLFWwindow *, int button, int action, int mods);
     static void cursorCallback(GLFWwindow *, double x, double y);
+    static void scrollCallback(GLFWwindow *, double xoffset, double yoffset);
+    static void charCallback(GLFWwindow *, unsigned int c);
 
     GLFWwindow *window_;
 
