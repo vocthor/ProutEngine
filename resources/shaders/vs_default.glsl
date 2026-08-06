@@ -8,9 +8,13 @@ layout (location = 4) in vec3 aTangent;
 layout (location = 5) in vec3 aBitangent;
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
 uniform mat3 normal;
+
+layout(std140) uniform CameraUBO {
+    mat4 view;
+    mat4 projection;
+    vec4 viewPos;
+} camera;
 
 out vec3 FragPos;
 out vec3 Normal;
@@ -29,5 +33,5 @@ void main()
     vec3 N = normalize(Normal);
     TBN = mat3(T, B, N);
 
-    gl_Position = projection * view * vec4(FragPos, 1.0);
+    gl_Position = camera.projection * camera.view * vec4(FragPos, 1.0);
 }

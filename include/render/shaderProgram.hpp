@@ -39,6 +39,8 @@ public:
     // ------------------------------------------------------------------------
     void setMat4(const std::string &name, const glm::mat4 &mat) const;
 
+    void bindUniformBlock(const std::string &blockName, ::GLuint bindingPoint) const;
+
 private:
     GLint uniformLocation(const std::string &name) const;
     void checkCompileErrors() const;

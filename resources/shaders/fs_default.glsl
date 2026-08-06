@@ -50,11 +50,16 @@ in vec3 Normal;
 in vec2 TextureCoord;
 in mat3 TBN;
 
-uniform vec3 viewPos;
 uniform vec3 ambientColor;
 uniform Material material;
 uniform Light lights[MAX_LIGHTS];
 uniform int  numLights;
+
+layout(std140) uniform CameraUBO {
+    mat4 view;
+    mat4 projection;
+    vec4 viewPos;
+} camera;
 
 out vec4 FragColor;
 
@@ -180,7 +185,7 @@ void main()
         N = normalize(Normal);
     }
 
-    vec3 V = normalize(viewPos - FragPos);
+    vec3 V = normalize(camera.viewPos.xyz - FragPos);
 
     // F0 — base reflectivity (dielectric ≈ 0.04, metallic = albedo)
     vec3 F0 = mix(vec3(0.04), albedo, metallic);

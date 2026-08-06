@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include "render/cameraUBO.hpp"
+
 // Forward declarations — full types included in renderer.cpp
 class Mesh;
 struct Material;
@@ -56,11 +58,12 @@ public:
     void endFrame();
 
 private:
-    // Upload camera matrices (view, projection, viewPos) and scene lights to a shader.
-    void uploadCameraAndLights(ShaderProgram &shader);
+    // Upload scene lights and bind camera UBO for this shader.
+    void uploadLightsAndBindCameraUBO(ShaderProgram &shader);
 
     Scene &scene_;
     TextureManager &texMgr_;
+    CameraUBO cameraUBO_;
 
     std::vector<RenderCommand> renderQueue_;
 };

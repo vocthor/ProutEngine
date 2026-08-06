@@ -19,6 +19,7 @@ Renderer::Renderer(Scene &scene, TextureManager &texMgr)
 
 void Renderer::beginFrame()
 {
+    cameraUBO_.update(scene_.camera, 50.0f, 0.1f, 100.0f);
     ::glClearColor(scene_.ambientColor.r, scene_.ambientColor.g, scene_.ambientColor.b, scene_.ambientColor.a);
     ::glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
@@ -74,7 +75,7 @@ void Renderer::flush()
             activeShader = cmd.shader;
             activeMaterial = nullptr; // force material rebind after a shader switch
             activeShader->use();
-            uploadCameraAndLights(*activeShader);
+            uploadLightsAndBindCameraUBO(*activeShader);
         }
 
         // Material switch: rebind textures and material uniforms.
@@ -100,9 +101,8 @@ void Renderer::endFrame()
     flush();
 }
 
-void Renderer::uploadCameraAndLights(ShaderProgram &shader)
+void Renderer::uploadLightsAndBindCameraUBO(ShaderProgram &shader)
 {
-    shader.setVec3("viewPos", scene_.camera.position);
-    scene_.camera.matrix(50.0f, 0.1f, 100.0f, shader);
+    shader.bindUniformBlock("CameraUBO", 0);
     scene_.uploadLights(shader);
 }

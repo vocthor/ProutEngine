@@ -115,6 +115,13 @@ void ShaderProgram::setMat4(const std::string &name, const glm::mat4 &mat) const
     ::glUniformMatrix4fv(uniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
+void ShaderProgram::bindUniformBlock(const std::string &blockName, ::GLuint bindingPoint) const
+{
+    const ::GLuint blockIndex = ::glGetUniformBlockIndex(handle_, blockName.c_str());
+    if (blockIndex != GL_INVALID_INDEX)
+        ::glUniformBlockBinding(handle_, blockIndex, bindingPoint);
+}
+
 void ShaderProgram::checkCompileErrors() const
 {
     checkState(handle_, GL_LINK_STATUS, "Failed to link shader program");
