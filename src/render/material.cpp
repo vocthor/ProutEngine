@@ -9,11 +9,11 @@ void Material::bind(ShaderProgram &shader, TextureManager &texMgr) const
     auto bindSlot = [&](int unit, const char *sampler, const char *hasFlag, TextureHandle h)
     {
         bool has = (h != TextureHandle::Invalid);
-        shader.setBool(hasFlag, has);
+        shader.setUniform<bool>(hasFlag, has);
         if (has)
         {
             texMgr.get(h).bind(unit);
-            shader.setInt(sampler, unit);
+            shader.setUniform<int>(sampler, unit);
         }
     };
 
@@ -23,8 +23,8 @@ void Material::bind(ShaderProgram &shader, TextureManager &texMgr) const
     bindSlot(3, "material.roughnessMap", "material.hasRoughnessMap", roughnessMap);
     bindSlot(4, "material.aoMap", "material.hasAoMap", aoMap);
 
-    shader.setVec3("material.albedo", albedo);
-    shader.setFloat("material.metallic", metallic);
-    shader.setFloat("material.roughness", roughness);
-    shader.setFloat("material.ao", ao);
+    shader.setUniform<glm::vec3>("material.albedo", albedo);
+    shader.setUniform<float>("material.metallic", metallic);
+    shader.setUniform<float>("material.roughness", roughness);
+    shader.setUniform<float>("material.ao", ao);
 }

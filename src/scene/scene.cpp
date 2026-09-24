@@ -4,6 +4,6 @@
 
 void Scene::uploadLights(ShaderProgram &shader) const
 {
-    shader.setVec3("ambientColor", ambientColor);
+    shader.setUniform<glm::vec3>("ambientColor", ambientColor);
     LightUtils::uploadToShader(shader, lights);
 }

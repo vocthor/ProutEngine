@@ -61,8 +61,8 @@ void Renderer::flush()
                          return a.material < b.material;
                      });
 
-    ShaderProgram *activeShader   = nullptr;
-    Material      *activeMaterial = nullptr;
+    ShaderProgram *activeShader = nullptr;
+    Material *activeMaterial = nullptr;
 
     for (const RenderCommand &cmd : renderQueue_)
     {
@@ -87,8 +87,8 @@ void Renderer::flush()
         }
 
         // Per-object uniforms.
-        activeShader->setMat4("model", cmd.modelMatrix);
-        activeShader->setMat3("normal", cmd.normalMatrix);
+        activeShader->setUniform<glm::mat4>("model", cmd.modelMatrix);
+        activeShader->setUniform<glm::mat3>("normal", cmd.normalMatrix);
 
         cmd.mesh->draw();
     }

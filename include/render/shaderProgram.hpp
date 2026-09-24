@@ -13,36 +13,36 @@ class ShaderProgram
 {
 public:
     ShaderProgram(const Shader &vertexShader, const Shader &fragmentShader);
-    // activate the shader
-    // ------------------------------------------------------------------------
+
     void use();
-    // utility uniform functions
-    // ------------------------------------------------------------------------
-    void setBool(const std::string &name, bool value) const;
-    // ------------------------------------------------------------------------
-    void setInt(const std::string &name, int value) const;
-    // ------------------------------------------------------------------------
-    void setFloat(const std::string &name, float value) const;
-    // ------------------------------------------------------------------------
-    void setVec2(const std::string &name, const glm::vec2 &value) const;
-    void setVec2(const std::string &name, float x, float y) const;
-    // ------------------------------------------------------------------------
-    void setVec3(const std::string &name, const glm::vec3 &value) const;
-    void setVec3(const std::string &name, float x, float y, float z) const;
-    // ------------------------------------------------------------------------
-    void setVec4(const std::string &name, const glm::vec4 &value) const;
-    void setVec4(const std::string &name, float x, float y, float z, float w) const;
-    // ------------------------------------------------------------------------
-    void setMat2(const std::string &name, const glm::mat2 &mat) const;
-    // ------------------------------------------------------------------------
-    void setMat3(const std::string &name, const glm::mat3 &mat) const;
-    // ------------------------------------------------------------------------
-    void setMat4(const std::string &name, const glm::mat4 &mat) const;
+
+    template <typename T>
+    void setUniform(const std::string &name, const T &value) const
+    {
+        if constexpr (std::is_same_v<T, bool>)
+            ::glUniform1i(getUniformLocation(name), (int)value);
+        else if constexpr (std::is_same_v<T, int>)
+            ::glUniform1i(getUniformLocation(name), value);
+        else if constexpr (std::is_same_v<T, float>)
+            ::glUniform1f(getUniformLocation(name), value);
+        else if constexpr (std::is_same_v<T, glm::vec2>)
+            ::glUniform2fv(getUniformLocation(name), 1, &value[0]);
+        else if constexpr (std::is_same_v<T, glm::vec3>)
+            ::glUniform3fv(getUniformLocation(name), 1, &value[0]);
+        else if constexpr (std::is_same_v<T, glm::vec4>)
+            ::glUniform4fv(getUniformLocation(name), 1, &value[0]);
+        else if constexpr (std::is_same_v<T, glm::mat2>)
+            ::glUniformMatrix2fv(getUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+        else if constexpr (std::is_same_v<T, glm::mat3>)
+            ::glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+        else if constexpr (std::is_same_v<T, glm::mat4>)
+            ::glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+    }
 
     void bindUniformBlock(const std::string &blockName, ::GLuint bindingPoint) const;
 
 private:
-    GLint uniformLocation(const std::string &name) const;
+    ::GLint getUniformLocation(const std::string &name) const;
     void checkCompileErrors() const;
 
     AutoRelease<::GLuint> handle_;

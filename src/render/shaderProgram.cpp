@@ -2,7 +2,7 @@
 
 namespace
 {
-    void checkState(::GLuint handle, GLenum state, std::string_view msg)
+    void checkState(::GLuint handle, ::GLenum state, std::string_view msg)
     {
         ::GLint success;
         ::glGetProgramiv(handle, state, &success);
@@ -44,7 +44,7 @@ void ShaderProgram::use()
 }
 
 // ! TODO : ca risque pas de péter si on bind un autre shader entre temps ?
-::GLint ShaderProgram::uniformLocation(const std::string &name) const
+::GLint ShaderProgram::getUniformLocation(const std::string &name) const
 {
     assert(("ShaderProgram must be bound before setting uniforms", bound_));
     auto it = uniformCache_.find(name);
@@ -53,66 +53,6 @@ void ShaderProgram::use()
     ::GLint loc = ::glGetUniformLocation(handle_, name.c_str());
     uniformCache_.emplace(name, loc);
     return loc;
-}
-
-void ShaderProgram::setBool(const std::string &name, bool value) const
-{
-    ::glUniform1i(uniformLocation(name), (int)value);
-}
-
-void ShaderProgram::setInt(const std::string &name, int value) const
-{
-    ::glUniform1i(uniformLocation(name), value);
-}
-
-void ShaderProgram::setFloat(const std::string &name, float value) const
-{
-    ::glUniform1f(uniformLocation(name), value);
-}
-
-void ShaderProgram::setVec2(const std::string &name, const glm::vec2 &value) const
-{
-    ::glUniform2fv(uniformLocation(name), 1, &value[0]);
-}
-
-void ShaderProgram::setVec2(const std::string &name, float x, float y) const
-{
-    ::glUniform2f(uniformLocation(name), x, y);
-}
-
-void ShaderProgram::setVec3(const std::string &name, const glm::vec3 &value) const
-{
-    ::glUniform3fv(uniformLocation(name), 1, &value[0]);
-}
-
-void ShaderProgram::setVec3(const std::string &name, float x, float y, float z) const
-{
-    ::glUniform3f(uniformLocation(name), x, y, z);
-}
-
-void ShaderProgram::setVec4(const std::string &name, const glm::vec4 &value) const
-{
-    ::glUniform4fv(uniformLocation(name), 1, &value[0]);
-}
-
-void ShaderProgram::setVec4(const std::string &name, float x, float y, float z, float w) const
-{
-    ::glUniform4f(uniformLocation(name), x, y, z, w);
-}
-
-void ShaderProgram::setMat2(const std::string &name, const glm::mat2 &mat) const
-{
-    ::glUniformMatrix2fv(uniformLocation(name), 1, GL_FALSE, &mat[0][0]);
-}
-
-void ShaderProgram::setMat3(const std::string &name, const glm::mat3 &mat) const
-{
-    ::glUniformMatrix3fv(uniformLocation(name), 1, GL_FALSE, &mat[0][0]);
-}
-
-void ShaderProgram::setMat4(const std::string &name, const glm::mat4 &mat) const
-{
-    ::glUniformMatrix4fv(uniformLocation(name), 1, GL_FALSE, &mat[0][0]);
 }
 
 void ShaderProgram::bindUniformBlock(const std::string &blockName, ::GLuint bindingPoint) const
