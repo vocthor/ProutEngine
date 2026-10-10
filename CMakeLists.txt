@@ -25,17 +25,17 @@ target_include_directories(imgui PUBLIC
     lib/imgui
     lib/imgui/backends
 )
+target_link_libraries(imgui PUBLIC glfw)
 
 
 ##### SOURCES #####
-file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+option(PROUT_BUILD_EDITOR "Build the editor executable (ImGui panels, viewport)" ON)
 
-add_executable("${CMAKE_PROJECT_NAME}")
+file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE EDITOR_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/editor/*.cpp")
+list(REMOVE_ITEM CORE_SOURCES ${EDITOR_SOURCES})
 
-target_sources("${CMAKE_PROJECT_NAME}" PRIVATE ${MY_SOURCES})
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC include lib/imgui)
-target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw glad stb_image assimp imgui)
-target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE
+set(PROUT_WARNINGS
     -Wall
     -Wextra
     -pedantic
@@ -51,4 +51,28 @@ target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE
     -Wwrite-strings
 )
 
-set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 23)
+# Engine core + game layer: shared by the game and the editor
+add_library(prout_core STATIC ${CORE_SOURCES})
+target_include_directories(prout_core PUBLIC include lib/imgui)
+target_link_libraries(prout_core PUBLIC glm glfw glad stb_image assimp imgui)
+target_compile_options(prout_core PRIVATE ${PROUT_WARNINGS})
+set_property(TARGET prout_core PROPERTY CXX_STANDARD 23)
+
+# Game: no editor code
+add_executable(ProutGame app/game/main.cpp)
+target_link_libraries(ProutGame PRIVATE prout_core)
+target_compile_options(ProutGame PRIVATE ${PROUT_WARNINGS})
+set_property(TARGET ProutGame PROPERTY CXX_STANDARD 23)
+
+# Editor: game + EditorLayer
+if(PROUT_BUILD_EDITOR)
+    add_library(prout_editor STATIC ${EDITOR_SOURCES})
+    target_link_libraries(prout_editor PUBLIC prout_core)
+    target_compile_options(prout_editor PRIVATE ${PROUT_WARNINGS})
+    set_property(TARGET prout_editor PROPERTY CXX_STANDARD 23)
+
+    add_executable(ProutEditor app/editor/main.cpp)
+    target_link_libraries(ProutEditor PRIVATE prout_editor)
+    target_compile_options(ProutEditor PRIVATE ${PROUT_WARNINGS})
+    set_property(TARGET ProutEditor PROPERTY CXX_STANDARD 23)
+endif()

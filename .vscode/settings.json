@@ -72,5 +72,6 @@
     "stop_token": "cpp",
     "thread": "cpp",
     "codecvt": "cpp"
-  }
+  },
+  "cmake.sourceDirectory": "/home/vocthor/Documents/DEV/ProutEngine"
 }

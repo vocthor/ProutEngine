@@ -1,6 +1,16 @@
 #include "input/inputManager.hpp"
 
+#include <imgui.h>
 #include <imgui_impl_glfw.h>
+
+namespace
+{
+    // The game build has no ImGui context: only forward events when one exists.
+    bool imguiActive()
+    {
+        return ::ImGui::GetCurrentContext() != nullptr;
+    }
+}
 
 InputManager::InputManager(GLFWwindow *window)
     : window_{window}
@@ -65,7 +75,8 @@ MouseSignals &InputManager::mouseButton(int glfwButton)
 
 void InputManager::keyCallback(GLFWwindow *w, int key, int scancode, int action, int mods)
 {
-    ::ImGui_ImplGlfw_KeyCallback(w, key, scancode, action, mods);
+    if (imguiActive())
+        ::ImGui_ImplGlfw_KeyCallback(w, key, scancode, action, mods);
 
     auto *self = static_cast<InputManager *>(::glfwGetWindowUserPointer(w));
     if (key < 0 || key > GLFW_KEY_LAST)
@@ -79,7 +90,8 @@ void InputManager::keyCallback(GLFWwindow *w, int key, int scancode, int action,
 
 void InputManager::mouseCallback(GLFWwindow *w, int button, int action, int mods)
 {
-    ::ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
+    if (imguiActive())
+        ::ImGui_ImplGlfw_MouseButtonCallback(w, button, action, mods);
 
     auto *self = static_cast<InputManager *>(::glfwGetWindowUserPointer(w));
     if (button < 0 || button > GLFW_MOUSE_BUTTON_LAST)
@@ -92,7 +104,8 @@ void InputManager::mouseCallback(GLFWwindow *w, int button, int action, int mods
 
 void InputManager::cursorCallback(GLFWwindow *w, double x, double y)
 {
-    ::ImGui_ImplGlfw_CursorPosCallback(w, x, y);
+    if (imguiActive())
+        ::ImGui_ImplGlfw_CursorPosCallback(w, x, y);
 
     auto *self = static_cast<InputManager *>(::glfwGetWindowUserPointer(w));
     glm::vec2 newPos = {static_cast<float>(x), static_cast<float>(y)};
@@ -109,10 +122,12 @@ void InputManager::cursorCallback(GLFWwindow *w, double x, double y)
 
 void InputManager::scrollCallback(GLFWwindow *w, double xoffset, double yoffset)
 {
-    ::ImGui_ImplGlfw_ScrollCallback(w, xoffset, yoffset);
+    if (imguiActive())
+        ::ImGui_ImplGlfw_ScrollCallback(w, xoffset, yoffset);
 }
 
 void InputManager::charCallback(GLFWwindow *w, unsigned int c)
 {
-    ::ImGui_ImplGlfw_CharCallback(w, c);
+    if (imguiActive())
+        ::ImGui_ImplGlfw_CharCallback(w, c);
 }

@@ -1,56 +1,18 @@
-#include "debug/imguiLayer.hpp"
+#include "editor/panels/inspectorPanel.hpp"
 
 #include <cfloat>
 #include <cmath>
 #include <string>
 
 #include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 
 #include "scene/entity.hpp"
 #include "scene/light.hpp"
 #include "scene/scene.hpp"
 
-ImGuiLayer::ImGuiLayer(GLFWwindow *window)
+void InspectorPanel::draw(Scene &scene)
 {
-    IMGUI_CHECKVERSION();
-    ::ImGui::CreateContext();
-    ::ImGui::StyleColorsDark();
-    ::ImGui_ImplGlfw_InitForOpenGL(window, false);
-    ::ImGui_ImplOpenGL3_Init("#version 330");
-}
-
-ImGuiLayer::~ImGuiLayer()
-{
-    ::ImGui_ImplOpenGL3_Shutdown();
-    ::ImGui_ImplGlfw_Shutdown();
-    ::ImGui::DestroyContext();
-}
-
-void ImGuiLayer::beginFrame()
-{
-    ::ImGui_ImplOpenGL3_NewFrame();
-    ::ImGui_ImplGlfw_NewFrame();
-    ::ImGui::NewFrame();
-}
-
-bool ImGuiLayer::wantsMouseCapture() const
-{
-    return ::ImGui::GetIO().WantCaptureMouse;
-}
-
-bool ImGuiLayer::wantsKeyboardCapture() const
-{
-    return ::ImGui::GetIO().WantCaptureKeyboard;
-}
-
-void ImGuiLayer::renderDebugPanel(Scene &scene)
-{
-    if (!debugGuiEnabled_)
-        return;
-
-    ::ImGui::Begin("ProutEngine Debug", &debugGuiEnabled_);
+    ::ImGui::Begin("Inspector");
 
     ::ImGui::Text("FPS: %.1f", ::ImGui::GetIO().Framerate);
     ::ImGui::Separator();
@@ -83,28 +45,28 @@ void ImGuiLayer::renderDebugPanel(Scene &scene)
 
         if (!scene.entities.empty())
         {
-            if (selectedEntityIndex_ < 0)
-                selectedEntityIndex_ = 0;
-            if (selectedEntityIndex_ >= static_cast<int>(scene.entities.size()))
-                selectedEntityIndex_ = static_cast<int>(scene.entities.size()) - 1;
+            if (selectedEntity_ < 0)
+                selectedEntity_ = 0;
+            if (selectedEntity_ >= static_cast<int>(scene.entities.size()))
+                selectedEntity_ = static_cast<int>(scene.entities.size()) - 1;
 
             if (::ImGui::BeginListBox("Entity List", ImVec2(-FLT_MIN, 160.0f)))
             {
                 for (int i = 0; i < static_cast<int>(scene.entities.size()); ++i)
                 {
-                    const bool isSelected = (selectedEntityIndex_ == i);
+                    const bool isSelected = (selectedEntity_ == i);
                     const char *entityName = scene.entities[i].name.empty() ? "<unnamed>" : scene.entities[i].name.c_str();
                     if (::ImGui::Selectable(entityName, isSelected))
-                        selectedEntityIndex_ = i;
+                        selectedEntity_ = i;
                     if (isSelected)
                         ::ImGui::SetItemDefaultFocus();
                 }
                 ::ImGui::EndListBox();
             }
 
-            if (selectedEntityIndex_ >= 0 && selectedEntityIndex_ < static_cast<int>(scene.entities.size()))
+            if (selectedEntity_ >= 0 && selectedEntity_ < static_cast<int>(scene.entities.size()))
             {
-                Entity &entity = scene.entities[static_cast<std::size_t>(selectedEntityIndex_)];
+                Entity &entity = scene.entities[static_cast<std::size_t>(selectedEntity_)];
                 ::ImGui::SeparatorText("Selected Entity");
                 ::ImGui::Text("Name: %s", entity.name.c_str());
 
@@ -191,10 +153,4 @@ void ImGuiLayer::renderDebugPanel(Scene &scene)
     }
 
     ::ImGui::End();
-}
-
-void ImGuiLayer::endFrame()
-{
-    ::ImGui::Render();
-    ::ImGui_ImplOpenGL3_RenderDrawData(::ImGui::GetDrawData());
 }

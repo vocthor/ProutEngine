@@ -4,53 +4,50 @@
 #include <utility>
 #include <map>
 
-namespace
+// -------------------------------------------------------------------------
+// RAII connection handle — disconnects automatically on destruction
+// -------------------------------------------------------------------------
+class Connection
 {
-    // -------------------------------------------------------------------------
-    // RAII connection handle — disconnects automatically on destruction
-    // -------------------------------------------------------------------------
-    class Connection
+public:
+    Connection() = default;
+
+    explicit Connection(std::function<void()> disconnector)
+        : disconnector_(std::move(disconnector)) {}
+
+    ~Connection() { disconnect(); }
+
+    Connection(const Connection &) = delete;
+    Connection &operator=(const Connection &) = delete;
+
+    Connection(Connection &&o) noexcept
+        : disconnector_(std::move(o.disconnector_))
     {
-    public:
-        Connection() = default;
+        o.disconnector_ = nullptr;
+    }
 
-        explicit Connection(std::function<void()> disconnector)
-            : disconnector_(std::move(disconnector)) {}
+    Connection &operator=(Connection &&o) noexcept
+    {
+        disconnect();
+        disconnector_ = std::move(o.disconnector_);
+        o.disconnector_ = nullptr;
+        return *this;
+    }
 
-        ~Connection() { disconnect(); }
-
-        Connection(const Connection &) = delete;
-        Connection &operator=(const Connection &) = delete;
-
-        Connection(Connection &&o) noexcept
-            : disconnector_(std::move(o.disconnector_))
+    void disconnect()
+    {
+        if (disconnector_)
         {
-            o.disconnector_ = nullptr;
+            disconnector_();
+            disconnector_ = nullptr;
         }
+    }
 
-        Connection &operator=(Connection &&o) noexcept
-        {
-            disconnect();
-            disconnector_ = std::move(o.disconnector_);
-            o.disconnector_ = nullptr;
-            return *this;
-        }
-
-        void disconnect()
-        {
-            if (disconnector_)
-            {
-                disconnector_();
-                disconnector_ = nullptr;
-            }
-        }
-
-    private:
-        std::function<void()> disconnector_;
-    };
-
-    // -------------------------------------------------------------------------
+private:
+    std::function<void()> disconnector_;
 };
+
+// -------------------------------------------------------------------------
 
 template <typename... Args>
 class Signal
